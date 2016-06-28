@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import argparse
 import calendar
+import copy
 import math
 
 from git import Git
@@ -19,8 +20,8 @@ COLORS_BLUE = [16, 17, 18, 19, 20, 21]
 COLORS_YELLOW_RED = [232, 220, 214, 208, 202, 196]
 
 BLOCK_THICK = '   '
-BLOCK_REG   = '  '
-BLOCK_THIN  = ' '
+BLOCK_REG = '  '
+BLOCK_THIN = ' '
 
 GRAPH_INLINE = False
 GRAPH_BLOCK = True
@@ -51,7 +52,7 @@ def normalize(dictionary, x, y):
     for key in dictionary:
         dictionary[key] = (dictionary[key] - min_value) / range1
 
-    #  then scale [x,y] and take ceiling
+    # then scale [x,y] and take ceiling
     range2 = y - x
     for key in dictionary:
         dictionary[key] = math.ceil((dictionary[key] * range2) + x)
@@ -106,40 +107,119 @@ def print_graph_month_header():
 
     for month in months:
         print(colorize(month, ansi=MONTHS_COLOR),
-              end=" "*8,
+              end=" " * 8,
               )
     print()
 
 
 def graph_block(day_contribution_map):
-
     # TODO: Show months correctly aligned
     # if GRAPH_MONTH_SHOW and BLOCK_WIDTH is not BLOCK_THIN:
     #     print_graph_month_header()
 
     sorted_nomr_daily_contribution = sorted(day_contribution_map)
-    #  iterate weekly staring from days of the year's first week
-    first_seven_day_of_year = sorted_nomr_daily_contribution[:7]
-    for day in first_seven_day_of_year:
-        month_index = day.month
-        for i in range(-1, 54 * 7, 7):
-            current_day = day + datetime.timedelta(days=i)
-            # TODO: Separate months by space
-            # if MONTH_SEPARATION_SHOW:
-            #     if current_day.month != month_index:
-            #         print(" ", end="")
-            #         month_index = current_day.month
-            if current_day <= datetime.date.today():
-                norm_day_contribution = int(day_contribution_map[current_day])
-                color = COLORS[norm_day_contribution]
-                print(colorize(BLOCK_WIDTH, ansi=0, ansi_bg=color), end="")
-        print()
+
+    # # iterate weekly staring from days of the year's first week
+    # first_seven_day_of_year = sorted_nomr_daily_contribution[:7]
+    # for day in first_seven_day_of_year:
+    #     month_index = day.month
+    #     for i in range(-1, 54 * 7, 7):
+    #         current_day = day + datetime.timedelta(days=i)
+    #         # TODO: Separate months by space
+    #         # if MONTH_SEPARATION_SHOW:
+    #         #     if current_day.month != month_index:
+    #         #         print(" ", end="")
+    #         #         month_index = current_day.month
+    #         if current_day <= datetime.date.today():
+    #             norm_day_contribution = int(day_contribution_map[current_day])
+    #             color = COLORS[norm_day_contribution]
+    #             print(colorize(BLOCK_WIDTH, ansi=0, ansi_bg=color), end="")
+    #     print()
+    #
+
+    streched_days = []
+    for i in range(1, 55):
+        first_seven_day_of_year = []
+        for j in range(7):
+            try:
+                first_seven_day_of_year.append(sorted_nomr_daily_contribution.pop(0))
+            except IndexError:
+                #  less than a week
+                break
+
+        for current_day in first_seven_day_of_year:
+            norm_day_contribution = int(day_contribution_map[current_day])
+            color = COLORS[norm_day_contribution]
+            streched_days.append((current_day, colorize(BLOCK_WIDTH,
+                                                        ansi=0,
+                                                        ansi_bg=color)))
+    if MONTH_SEPARATION:
+        
+        days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
+                'Thursday', 'Friday', 'Saturday']
+        months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+        days_buckets = {}
+        for d in days:
+            days_buckets[d] = 0
+
+        months_bucket = {}
+
+        for m in months:
+            months_bucket[m] = copy.deepcopy(days_buckets)
+
+        today_year = datetime.date.today()
+        last_year = (today_year - datetime.timedelta(days=365 + 7))
+
+        years_bucket = {
+            today_year.year: copy.deepcopy(months_bucket),
+            last_year.year: copy.deepcopy(months_bucket),
+        }
+
+        #  fill in buckets
+        for i in range(-1, 6):
+            for j in range(i, len(streched_days), 7):
+                day = streched_days[j][0]
+                years_bucket[day.year][day.strftime("%b")][day.strftime("%A")] += 1
+
+        #  init months width dict
+        months_width = {}
+        for y in [today_year.year, last_year.year]:
+            for m in months:
+                key = datetime.date(y, list(calendar.month_abbr).index(m), 1)
+                months_width[key] = 0
+
+        #  compute width of each month
+        for i in range(-1, 6):
+            for j in range(i, len(streched_days), 7):
+                day = streched_days[j][0]
+                width = max(years_bucket[day.year][day.strftime("%b")].values())
+                key = datetime.date(day.year, day.month, 1)
+                months_width[key] = width
+
+        #  remove un-used keys
+        months_width = {k: v for k, v in months_width.items() if v}
+
+        for i in range(-1, 6):
+            for j in range(i, len(streched_days), 7):
+                day = streched_days[j][0]
+                key = datetime.date(day.year, day.month, 1)
+
+                print("{}".format(streched_days[j][1]), end="")
+            print()
+
+    else:
+
+        for i in range(-1, 6):
+            for j in range(i, len(streched_days), 7):
+                print("{}".format(streched_days[j][1]), end="")
+            print()
 
 
 def main():
-
     parser = argparse.ArgumentParser(
-              description='githeat: Heatmap for your git repos on your terminal')
+            description='githeat: Heatmap for your git repos on your terminal')
 
     parser.add_argument('--type', '-t',
                         choices=['inline', 'block'],
@@ -198,13 +278,13 @@ def main():
             current_day = last_year + datetime.timedelta(days=i)
             day_contribution_map[current_day] = 0.0
 
-        #  update dict with contributions
+        # update dict with contributions
         for dt in dates:
             contribution_day = datetime.date(dt.year, dt.month, dt.day)
             if contribution_day in day_contribution_map:
                 day_contribution_map[contribution_day] += 1.0
 
-        #  normalize values between [0, 5] because we have six colors
+        # normalize values between [0, 5] because we have six colors
         day_contribution_map = normalize(day_contribution_map, 0, 5)
 
         if GRAPH_INLINE:
@@ -214,6 +294,7 @@ def main():
 
     except InvalidGitRepositoryError:
         print('Are you sure your in an initialized git directory?')
+
 
 if __name__ == '__main__':
     sys.exit(main())
