@@ -4,12 +4,10 @@ from __future__ import print_function
 import argparse
 import calendar
 import math
-import random
 
 from git import Git
 from git.exc import InvalidGitRepositoryError
 from dateutil.parser import parse
-from dateutil.tz import tzoffset
 from collections import defaultdict
 import datetime
 from xtermcolor import colorize
@@ -17,6 +15,8 @@ from xtermcolor import colorize
 import sys
 
 COLORS = [0, 22, 28, 34, 40, 46]
+COLORS_BLUE = [16, 17, 18, 19, 20, 21]
+COLORS_YELLOW_RED = [232, 220, 214, 208, 202, 196]
 
 BLOCK_THICK = '   '
 BLOCK_REG   = '  '
@@ -36,6 +36,14 @@ MONTHS_COLOR = 6
 
 
 def normalize(dictionary, x, y):
+    """
+    Normalize values in dictinoary to be in range [x, y]
+
+    :param dictionary:
+    :param x: range min
+    :param y: range max
+    :return: dict with values changed accordingly
+    """
     #  normalize to [0, 1]
     min_value = min(dictionary.values())
     max_value = max(dictionary.values())
@@ -52,6 +60,11 @@ def normalize(dictionary, x, y):
 
 
 def graph_inline(day_contribution_map):
+    """
+    Prints a whole year of contribution in inline form
+    :param day_contribution_map:
+    :return:
+    """
     sorted_nomr_daily_contribution = sorted(day_contribution_map)
     for day in sorted_nomr_daily_contribution:
         for i in range(0, 54 * 7):
@@ -75,20 +88,26 @@ def get_months(start_date, months):
     """
     result = []
     for i in range(months):
-        start_date -= datetime.timedelta(days=calendar.monthrange(start_date.year, start_date.month)[1])
+        start_date -= datetime.timedelta(days=calendar.monthrange(start_date.year,
+                                                                  start_date.month)[1])
         result.append(calendar.month_abbr[start_date.month])
     return result
 
 
 def print_graph_month_header():
+    """
+    Prints a list of months abbreviations
+    :return:
+    """
+    # TODO: align months correctly with its month block
     months = get_months(datetime.date.today(), 12)
     #  append current month to front of list
     months = [months[-1]] + months
 
     for month in months:
         print(colorize(month, ansi=MONTHS_COLOR),
-                      end="       ",
-                      )
+              end=" "*8,
+              )
     print()
 
 
@@ -103,7 +122,7 @@ def graph_block(day_contribution_map):
     first_seven_day_of_year = sorted_nomr_daily_contribution[:7]
     for day in first_seven_day_of_year:
         month_index = day.month
-        for i in range(0, 54 * 7, 7):
+        for i in range(-1, 54 * 7, 7):
             current_day = day + datetime.timedelta(days=i)
             # TODO: Separate months by space
             # if MONTH_SEPARATION_SHOW:
@@ -119,11 +138,48 @@ def graph_block(day_contribution_map):
 
 def main():
 
+    parser = argparse.ArgumentParser(
+              description='githeat: Heatmap for your git repos on your terminal')
+
+    parser.add_argument('--type', '-t',
+                        choices=['inline', 'block'],
+                        help='Choose how you want the graph to be displayed',
+                        default='block')
+
+    parser.add_argument('--width', '-w',
+                        choices=['thick', 'regular', 'thin'],
+                        help='Choose how wide you want the graph blocks to be',
+                        default='regular')
+
+    parser.add_argument('--author', '-a',
+                        help='Filter heatmap by author. You can also write regex here')
+
+    cli = parser.parse_args()
+
+    if cli.type.lower() == 'inline':
+        global GRAPH_INLINE
+        GRAPH_INLINE = True
+
+    if cli.width:
+        global BLOCK_WIDTH
+
+        if cli.width.lower() == 'thick':
+            BLOCK_WIDTH = BLOCK_THICK
+        elif cli.width.lower() == 'regular':
+            BLOCK_WIDTH = BLOCK_REG
+        else:
+            BLOCK_WIDTH = BLOCK_THIN
+
+    author = cli.author
+
     try:
         g = Git('/Users/mustafa/Repos/groppus')
-        # loginfo = g.log()
-        last_year_log_dates = g.log('--author=Mustafa', "--since=2.year", "--pretty=format:'%ci'")
-        # loginfo = g.log('--author=Afshin Mehrabani', '--pretty=tformat:','--numstat')
+        git_log_args = ["--since=1.year",
+                        "--pretty=format:'%ci'"]
+        if author:
+            git_log_args.append('--author={}'.format(author))
+
+        last_year_log_dates = g.log(git_log_args)
         dates = last_year_log_dates.replace("'", '').split('\n')
         if dates and dates[0]:
             dates = [parse(dt) for dt in dates]
@@ -155,46 +211,6 @@ def main():
             graph_inline(day_contribution_map)
         else:
             graph_block(day_contribution_map)
-
-
-
-        # print
-        #
-        # for i in [0, 22, 28, 34, 40, 46]:
-        #     print(colorize('  ', ansi=0, ansi_bg=i)),
-        #     for j in random.sample([0, 22, 28, 34, 40, 46], len([0, 22, 28, 34, 40, 46])):
-        #         print(colorize('  ', ansi=0, ansi_bg=j)),
-        # print
-        # for i in [0, 22, 28, 34, 40, 46]:
-        #     print(colorize('  ', ansi=0, ansi_bg=i)),
-        #     for j in random.sample([0, 22, 28, 34, 40, 46], len([0, 22, 28, 34, 40, 46])):
-        #         print(colorize('  ', ansi=0, ansi_bg=j)),
-        # print
-        # for i in [0, 22, 28, 34, 40, 46]:
-        #     print(colorize('  ', ansi=0, ansi_bg=i)),
-        #     for j in random.sample([0, 22, 28, 34, 40, 46], len([0, 22, 28, 34, 40, 46])):
-        #         print(colorize('  ', ansi=0, ansi_bg=j)),
-        # print
-        # for i in [0, 22, 28, 34, 40, 46]:
-        #     print(colorize('  ', ansi=0, ansi_bg=i)),
-        #     for j in random.sample([0, 22, 28, 34, 40, 46], len([0, 22, 28, 34, 40, 46])):
-        #         print(colorize('  ', ansi=0, ansi_bg=j)),
-        # print
-        # for i in [0, 22, 28, 34, 40, 46]:
-        #     print(colorize('  ', ansi=0, ansi_bg=i)),
-        #     for j in random.sample([0, 22, 28, 34, 40, 46], len([0, 22, 28, 34, 40, 46])):
-        #         print(colorize('  ', ansi=0, ansi_bg=j)),
-        # print
-        # for i in [0, 22, 28, 34, 40, 46]:
-        #     print(colorize('  ', ansi=0, ansi_bg=i)),
-        #     for j in random.sample([0, 22, 28, 34, 40, 46], len([0, 22, 28, 34, 40, 46])):
-        #         print(colorize('  ', ansi=0, ansi_bg=j)),
-        # print
-        # for i in [0, 22, 28, 34, 40, 46]:
-        #     print(colorize('  ', ansi=0, ansi_bg=i)),
-        #     for j in random.sample([0, 22, 28, 34, 40, 46], len([0, 22, 28, 34, 40, 46])):
-        #         print(colorize('  ', ansi=0, ansi_bg=j)),
-        # print
 
     except InvalidGitRepositoryError:
         print('Are you sure your in an initialized git directory?')
