@@ -27,12 +27,14 @@ BLOCK_THIN = ' '
 GRAPH_INLINE = False
 GRAPH_BLOCK = True
 GRAPH_MONTH = True
-MONTH_SEPARATION = False
+MONTH_SEPARATION = True
+BLOCK_SEPARATION = False
 
 # Defaults
 GRAPH_TYPE = GRAPH_BLOCK
 BLOCK_WIDTH = BLOCK_REG
 MONTH_SEPARATION_SHOW = MONTH_SEPARATION
+BLOCK_SEPARATION_SHOW = ' ' if BLOCK_SEPARATION else ''
 GRAPH_MONTH_SHOW = GRAPH_MONTH
 MONTHS_COLOR = 6
 
@@ -152,6 +154,7 @@ def graph_block(day_contribution_map):
     #     print_graph_month_header()
 
     sorted_nomr_daily_contribution = sorted(day_contribution_map)
+    print(sorted_nomr_daily_contribution[0])
 
     streched_days = []
     copy_sorted_nomr_daily_contribution = copy.deepcopy(sorted_nomr_daily_contribution)
@@ -233,13 +236,110 @@ def graph_block(day_contribution_map):
         print()
 
         # TODO: Separate months by space
+        class Column:
+
+            def __init__(self, full_empty_col=False):
+                if full_empty_col:
+                    self.col = [[None, " "]] * 7
+                else:
+                    self.col = []
+
+            def append(self, val):
+                if len(self.col) >= 7:
+                    raise ValueError("Can't add more than 7 days")
+                self.col.append(val)
+
+            def fill(self):
+                while len(self.col) != 7:
+                    self.col += [[None, BLOCK_WIDTH]]
+
+            def fill_by(self, first_x):
+                self.col += [[None, BLOCK_WIDTH]] * first_x
+
+            def __len__(self):
+                return len(self.col)
+
+            def __str__(self):
+                result = ""
+                for c in self.col:
+                    result += str(c[0]) + "\n"
+                return result
+
+            def __repr__(self):
+                if self.col:
+                    return "Week of {}".format(self.col[0][0])
+                else:
+                    return "Empty col"
+
+
+        matrix = []
+
+        first_day = sorted_nomr_daily_contribution[0]
+        if first_day.strftime("%A") != "Sunday":
+            c = Column()
+            d = first_day - datetime.timedelta(days=1)
+            while d.strftime("%A") != "Saturday":
+                d = d - datetime.timedelta(days=1)
+                c.append([None, BLOCK_WIDTH])
+            matrix.append(c)
+        else:
+            new_column = Column()
+            matrix.append(new_column)
+
+        for current_day in sorted_nomr_daily_contribution:
+            last_week_col = matrix[-1]
+            norm_day_contribution = int(day_contribution_map[current_day])
+            color = COLORS[norm_day_contribution]
+
+            try:
+                last_week_col.append([current_day, colorize(BLOCK_WIDTH,
+                                                            ansi=0,
+                                                            ansi_bg=color)])
+                # print(last_week_col)
+
+            except ValueError:
+                # print('value error occured')
+                new_column = Column()
+                matrix.append(new_column)
+                last_week_col = matrix[-1]
+                last_week_col.append([current_day, colorize(BLOCK_WIDTH,
+                                                            ansi=0,
+                                                            ansi_bg=color)])
+
+            next_day = current_day + datetime.timedelta(days=1)
+            if next_day.month != current_day.month:
+                last_week_col.fill()
+                new_column = Column()
+                new_column.fill()
+                matrix.append(new_column)
+                new_column = Column()
+                matrix.append(new_column)
+                last_week_col = matrix[-1]
+                next_day_num = days.index(next_day.strftime("%A"))
+                last_week_col.fill_by(next_day_num)
+            elif len(last_week_col) != 7 and next_day.strftime("%A") == 'Sunday':
+                last_week_col.fill()
+                new_column = Column()
+                matrix.append(new_column)
+                last_week_col = matrix[-1]
+
+
+        # print(matrix)
+        matrix[-1].fill()
+        print(matrix[0].col)
+
+        for i in range(7):
+            for week in matrix:
+                print(week.col[i][1], end="")
+
+            print()
 
     else:
 
         for i in range(0, 6):
             for j in range(i, len(streched_days), 7):
-                print("{}".format(streched_days[j][1]), end="")
-            print()
+                print("{}{}".format(streched_days[j][1], BLOCK_SEPARATION_SHOW), end="")
+            print("{}".format("\n" if BLOCK_SEPARATION_SHOW else ''))
 
     print()
 
@@ -297,12 +397,18 @@ def main():
         day_contribution_map = defaultdict(float)
 
         today = datetime.date.today()
-        last_year = today - relativedelta(years=1)
+        last_year = today - relativedelta(years=1, days=7)
 
         #  iterate through from last year date and init dict with zeros
         delta = today - last_year
+        flag_skip_til_first_sunday = True
         for i in range(delta.days + 1):
             current_day = last_year + datetime.timedelta(days=i)
+            if flag_skip_til_first_sunday:
+                if current_day.strftime("%A") != 'Sunday':
+                    continue
+                else:
+                    flag_skip_til_first_sunday = False
             day_contribution_map[current_day] = 0.0
 
         # update dict with contributions
