@@ -3,11 +3,10 @@ from __future__ import print_function
 
 import argparse
 import calendar
-import copy
 import math
 
 from git import Git
-from git.exc import InvalidGitRepositoryError
+from git.exc import InvalidGitRepositoryError, GitCommandError, GitCommandNotFound
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
@@ -16,9 +15,9 @@ from xtermcolor import colorize
 
 import sys
 
-COLORS = [0, 22, 28, 34, 40, 46]
-COLORS_BLUE = [16, 17, 18, 19, 20, 21]
-COLORS_YELLOW_RED = [232, 220, 214, 208, 202, 196]
+COLORS_GRASS = [0, 22, 28, 34, 40, 46]
+COLORS_SKY = [0, 24, 31, 38, 45, 51]
+COLORS_FIRE = [232, 220, 214, 208, 202, 196]
 
 BLOCK_THICK = '   '
 BLOCK_REG = '  '
@@ -31,6 +30,7 @@ MONTH_SEPARATION = True
 BLOCK_SEPARATION = False
 
 # Defaults
+COLORS = COLORS_GRASS
 GRAPH_TYPE = GRAPH_BLOCK
 BLOCK_WIDTH = BLOCK_REG
 MONTH_SEPARATION_SHOW = MONTH_SEPARATION
@@ -81,15 +81,6 @@ def graph_inline(day_contribution_map):
                       )
         print()
         break
-
-
-def get_month_from_abbrv(month_abbrv):
-    """
-    Given the month abbrv, return it's number
-    :param month_abbrv:
-    :return:
-    """
-    return list(calendar.month_abbr).index(month_abbrv)
 
 
 def get_months(start_date, months, include_year=False):
@@ -269,9 +260,9 @@ def main():
                         default='reg')
 
     parser.add_argument('--color', '-c',
-                        choices=['thick', 'reg', 'thin'],
+                        choices=['grass', 'fire', 'sky'],
                         help='Choose how wide you want the graph blocks to be',
-                        default='reg')
+                        default='grass')
 
     parser.add_argument('--single', '-s', dest='single',
                         action='store_true',
@@ -301,6 +292,16 @@ def main():
         else:
             BLOCK_WIDTH = BLOCK_THIN
 
+    if cli.color:
+        global COLORS
+
+        if cli.color.lower() == 'grass':
+            COLORS = COLORS_GRASS
+        elif cli.color.lower() == 'sky':
+            COLORS = COLORS_SKY
+        else:
+            COLORS = COLORS_FIRE
+
     if cli.single:
         global BLOCK_SEPARATION
         global BLOCK_SEPARATION_SHOW
@@ -314,7 +315,7 @@ def main():
     author = cli.author
 
     try:
-        g = Git('/Users/mustafa/Repos/legacy-homebrew')
+        g = Git('/Users/mustafa/Repos/tensorflow')
         git_log_args = ["--since=1 year 7 days",
                         "--pretty=format:'%ci'"]
         if author:
@@ -359,7 +360,7 @@ def main():
         else:
             graph_block(day_contribution_map)
 
-    except InvalidGitRepositoryError:
+    except (InvalidGitRepositoryError, GitCommandError, GitCommandNotFound):
         print('Are you sure your in an initialized git directory?')
 
 
