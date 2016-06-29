@@ -9,6 +9,7 @@ import math
 from git import Git
 from git.exc import InvalidGitRepositoryError
 from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from collections import defaultdict
 import datetime
 from xtermcolor import colorize
@@ -26,7 +27,7 @@ BLOCK_THIN = ' '
 GRAPH_INLINE = False
 GRAPH_BLOCK = True
 GRAPH_MONTH = True
-MONTH_SEPARATION = True
+MONTH_SEPARATION = False
 
 # Defaults
 GRAPH_TYPE = GRAPH_BLOCK
@@ -80,36 +81,69 @@ def graph_inline(day_contribution_map):
         break
 
 
-def get_months(start_date, months):
+def get_month_from_abbrv(month_abbrv):
+    """
+    Given the month abbrv, return it's number
+    :param month_abbrv:
+    :return:
+    """
+    return list(calendar.month_abbr).index(month_abbrv)
+
+
+def get_months(start_date, months, include_year=False):
     """
     Returns a list of months abbreviations starting from start_date
+    :param include_year:
     :param start_date:
     :param months: number of previous months to return
-    :return: list of months abbr
+    :return: list of months abbr if not include_year, else list of list [year, month]
     """
     result = []
     for i in range(months):
         start_date -= datetime.timedelta(days=calendar.monthrange(start_date.year,
                                                                   start_date.month)[1])
-        result.append(calendar.month_abbr[start_date.month])
+        if include_year:
+            result.append([start_date.year, calendar.month_abbr[start_date.month]])
+        else:
+            result.append(calendar.month_abbr[start_date.month])
     return result
+
+
+def get_months_with_last_same_as_first(start_date, months, include_year=False):
+    """
+    Returns a list of months abbreviations starting from start_date, and last month
+    is the same is first month (i.e. extra month)
+    :param include_year:
+    :param start_date:
+    :param months: number of previous months to return
+    :return: list of months abbr if not include_year, else list of tuple [year, month]
+    """
+    if include_year:
+        months = get_months(datetime.date.today(), 12, include_year=True)
+        #  update last month to have current year
+        months = [[start_date.year, calendar.month_abbr[start_date.month]]] + months
+    else:
+        months = get_months(datetime.date.today(), 12)
+        #  append current month to front of list
+        months = [months[-1]] + months
+
+    return months
 
 
 def print_graph_month_header():
     """
-    Prints a list of months abbreviations
+    Prints and returns a list of months abbreviations
     :return:
     """
     # TODO: align months correctly with its month block
-    months = get_months(datetime.date.today(), 12)
-    #  append current month to front of list
-    months = [months[-1]] + months
+    months = get_months_with_last_same_as_first(datetime.date.today(), 12)
 
     for month in months:
         print(colorize(month, ansi=MONTHS_COLOR),
               end=" " * 8,
               )
     print()
+    return months
 
 
 def graph_block(day_contribution_map):
@@ -119,30 +153,13 @@ def graph_block(day_contribution_map):
 
     sorted_nomr_daily_contribution = sorted(day_contribution_map)
 
-    # # iterate weekly staring from days of the year's first week
-    # first_seven_day_of_year = sorted_nomr_daily_contribution[:7]
-    # for day in first_seven_day_of_year:
-    #     month_index = day.month
-    #     for i in range(-1, 54 * 7, 7):
-    #         current_day = day + datetime.timedelta(days=i)
-    #         # TODO: Separate months by space
-    #         # if MONTH_SEPARATION_SHOW:
-    #         #     if current_day.month != month_index:
-    #         #         print(" ", end="")
-    #         #         month_index = current_day.month
-    #         if current_day <= datetime.date.today():
-    #             norm_day_contribution = int(day_contribution_map[current_day])
-    #             color = COLORS[norm_day_contribution]
-    #             print(colorize(BLOCK_WIDTH, ansi=0, ansi_bg=color), end="")
-    #     print()
-    #
-
     streched_days = []
+    copy_sorted_nomr_daily_contribution = copy.deepcopy(sorted_nomr_daily_contribution)
     for i in range(1, 55):
         first_seven_day_of_year = []
         for j in range(7):
             try:
-                first_seven_day_of_year.append(sorted_nomr_daily_contribution.pop(0))
+                first_seven_day_of_year.append(copy_sorted_nomr_daily_contribution.pop(0))
             except IndexError:
                 #  less than a week
                 break
@@ -154,7 +171,7 @@ def graph_block(day_contribution_map):
                                                         ansi=0,
                                                         ansi_bg=color)))
     if MONTH_SEPARATION:
-        
+
         days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
                 'Thursday', 'Friday', 'Saturday']
         months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -162,7 +179,7 @@ def graph_block(day_contribution_map):
 
         days_buckets = {}
         for d in days:
-            days_buckets[d] = 0
+            days_buckets[d] = []
 
         months_bucket = {}
 
@@ -170,7 +187,7 @@ def graph_block(day_contribution_map):
             months_bucket[m] = copy.deepcopy(days_buckets)
 
         today_year = datetime.date.today()
-        last_year = (today_year - datetime.timedelta(days=365 + 7))
+        last_year = (today_year - relativedelta(years=1))
 
         years_bucket = {
             today_year.year: copy.deepcopy(months_bucket),
@@ -178,43 +195,53 @@ def graph_block(day_contribution_map):
         }
 
         #  fill in buckets
-        for i in range(-1, 6):
-            for j in range(i, len(streched_days), 7):
-                day = streched_days[j][0]
-                years_bucket[day.year][day.strftime("%b")][day.strftime("%A")] += 1
+        for i in range(-1, 6):  # going day by day
+            for j in range(i, len(streched_days), 7):  # jumping week by week
+                day_color_pair = streched_days[j]
+                day = day_color_pair[0]
+                years_bucket[day.year][day.strftime("%b")][day.strftime("%A")].append(
+                        day_color_pair)
 
         #  init months width dict
         months_width = {}
         for y in [today_year.year, last_year.year]:
             for m in months:
-                key = datetime.date(y, list(calendar.month_abbr).index(m), 1)
+                key = datetime.date(y, get_month_from_abbrv(m), 1)
                 months_width[key] = 0
 
-        #  compute width of each month
-        for i in range(-1, 6):
-            for j in range(i, len(streched_days), 7):
-                day = streched_days[j][0]
-                width = max(years_bucket[day.year][day.strftime("%b")].values())
-                key = datetime.date(day.year, day.month, 1)
+        for y in years_bucket:
+            for m in years_bucket[y]:
+                width = max([len(x) for x in years_bucket[y][m].values()])
+                key = datetime.date(y, get_month_from_abbrv(m), 1)
                 months_width[key] = width
 
         #  remove un-used keys
         months_width = {k: v for k, v in months_width.items() if v}
 
-        for i in range(-1, 6):
-            for j in range(i, len(streched_days), 7):
-                day = streched_days[j][0]
-                key = datetime.date(day.year, day.month, 1)
+        print('Months widths:')
+        for mw in months_width:
+            print("{}  {}".format(mw, months_width[mw]))
+        print()
 
-                print("{}".format(streched_days[j][1]), end="")
-            print()
+        print("Months order")
+        months_order = get_months_with_last_same_as_first(datetime.date.today(),
+                                                          12,
+                                                          include_year=True)
+        months_order.reverse()
+
+        print(months_order)
+        print()
+
+        # TODO: Separate months by space
 
     else:
 
-        for i in range(-1, 6):
+        for i in range(0, 6):
             for j in range(i, len(streched_days), 7):
                 print("{}".format(streched_days[j][1]), end="")
             print()
+
+    print()
 
 
 def main():
@@ -270,7 +297,7 @@ def main():
         day_contribution_map = defaultdict(float)
 
         today = datetime.date.today()
-        last_year = today - datetime.timedelta(days=365 + 7)
+        last_year = today - relativedelta(years=1)
 
         #  iterate through from last year date and init dict with zeros
         delta = today - last_year
