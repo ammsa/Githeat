@@ -3,17 +3,18 @@ from __future__ import print_function
 
 import argparse
 import calendar
-import math
-
-from git import Git
-from git.exc import InvalidGitRepositoryError, GitCommandError, GitCommandNotFound
-from dateutil.parser import parse
-from dateutil.relativedelta import relativedelta
-from collections import defaultdict
 import datetime
-from xtermcolor import colorize
-
+import itertools
+import math
 import sys
+from collections import Counter, defaultdict
+
+from dateutil.parser import parse as parse_date
+from dateutil.relativedelta import relativedelta
+from git import Git
+from git.exc import (
+    GitCommandError, GitCommandNotFound, InvalidGitRepositoryError)
+from xtermcolor import colorize
 
 COLORS_GRASS = [0, 22, 28, 34, 40, 46]
 COLORS_SKY = [0, 24, 31, 38, 45, 51]
@@ -28,6 +29,7 @@ GRAPH_BLOCK = True
 GRAPH_MONTH = True
 MONTH_SEPARATION = True
 BLOCK_SEPARATION = False
+STATS = False
 
 # Defaults
 COLORS = COLORS_GRASS
@@ -37,6 +39,8 @@ MONTH_SEPARATION_SHOW = MONTH_SEPARATION
 BLOCK_SEPARATION_SHOW = ' ' if BLOCK_SEPARATION else ''
 GRAPH_MONTH_SHOW = GRAPH_MONTH
 MONTHS_COLOR = 6
+SHOW_BY_DAY = False
+SHOW_STAT = STATS
 
 
 def normalize(dictionary, x, y):
@@ -61,6 +65,17 @@ def normalize(dictionary, x, y):
         dictionary[key] = math.ceil((dictionary[key] * range2) + x)
 
     return dictionary
+
+
+def print_stats(commits_db, n=5):
+    commits_authors = [c.author for c in
+                       list(itertools.chain.from_iterable(commits_db.values()))]
+    counter = Counter(commits_authors)
+    top_n = counter.most_common(n)
+    if top_n:
+        print("Top {} committers:".format(n))
+        for idx, info in enumerate(top_n):
+            print("{}. {}: {}".format(idx+1, info[0], info[1]))
 
 
 def graph_inline(day_contribution_map):
@@ -231,18 +246,29 @@ def graph_block(day_contribution_map):
             next_day_num = days.index(next_day.strftime("%A"))
             last_week_col.fill_by(next_day_num)
 
-    #  make sure that most current week (last col of matrix) col is of size 7,
+    # make sure that most current week (last col of matrix) col is of size 7,
     #  so fill it if it's not
     matrix[-1].fill()
 
     for i in range(7):
         for week in matrix:
+
             if not MONTH_SEPARATION:
                 if week.col[i][1] == BLOCK_WIDTH:
                     continue
 
             print("{}{}".format(week.col[i][1], BLOCK_SEPARATION_SHOW), end="")
         print("{}".format("\n" if BLOCK_SEPARATION_SHOW else ''))
+
+
+class Commit:
+    def __init__(self, date, author):
+        self.date = date
+        self.author = author
+
+    def __cmp__(self, other):
+        if hasattr(other, 'date'):
+            return self.date.__cmp__(other.date)
 
 
 def main():
@@ -259,12 +285,21 @@ def main():
                         help='Choose how wide you want the graph blocks to be',
                         default='reg')
 
+    parser.add_argument('--day', '-d',
+                        choices=['sun', 'sat', 'mon', 'tues', 'wedn', 'thur', 'fri'],
+                        help='Choose what day to show')
+
     parser.add_argument('--color', '-c',
                         choices=['grass', 'fire', 'sky'],
                         help='Choose how wide you want the graph blocks to be',
                         default='grass')
 
-    parser.add_argument('--single', '-s', dest='single',
+    parser.add_argument('--stat', '-s', dest='stat',
+                        action='store_true',
+                        help='Show commits stat',
+                        default=False)
+
+    parser.add_argument('--block', '-b', dest='block',
                         action='store_true',
                         help='Separate each day',
                         default=False)
@@ -302,7 +337,19 @@ def main():
         else:
             COLORS = COLORS_FIRE
 
-    if cli.single:
+    if cli.day:
+        global SHOW_BY_DAY
+        days = ['sun', 'sat', 'mon', 'tues', 'wedn', 'thur', 'fri']
+        days_full = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
+                     'Thursday', 'Friday', 'Saturday']
+
+        SHOW_BY_DAY = days_full[days.index(cli.day.lower())]
+
+    if cli.stat:
+        global SHOW_STAT
+        SHOW_STAT = True
+
+    if cli.block:
         global BLOCK_SEPARATION
         global BLOCK_SEPARATION_SHOW
         BLOCK_SEPARATION = True
@@ -317,17 +364,33 @@ def main():
     try:
         g = Git('/Users/mustafa/Repos/tensorflow')
         git_log_args = ["--since=1 year 7 days",
-                        "--pretty=format:'%ci'"]
+                        "--pretty=format:'%ci ~ %an'"]
         if author:
             git_log_args.append('--author={}'.format(author))
 
         last_year_log_dates = g.log(git_log_args)
-        dates = last_year_log_dates.replace("'", '').split('\n')
-        if dates and dates[0]:
-            dates = [parse(dt) for dt in dates]
+
+        raw_commits = last_year_log_dates.replace("'", '').encode('utf-8').split("\n")
+        commits_db = {}  # holds commits by date as key
+
+        if raw_commits and raw_commits[0]:
+            for rc in raw_commits:
+                date, author = rc.split(" ~ ")
+                date = parse_date(date)
+
+                if SHOW_BY_DAY and SHOW_BY_DAY != date.strftime("%A"):
+                    continue
+
+                commit = Commit(date, author)
+                if date in commits_db:
+                    commits_db[date].append(commit)
+                else:
+                    commits_db[date] = [commit]
         else:
             print('No contribution found')
             sys.exit(0)
+
+        dates = commits_db.keys()
 
         day_contribution_map = defaultdict(float)
 
@@ -359,6 +422,10 @@ def main():
             graph_inline(day_contribution_map)
         else:
             graph_block(day_contribution_map)
+
+        if SHOW_STAT:
+            print()
+            print_stats(commits_db)
 
     except (InvalidGitRepositoryError, GitCommandError, GitCommandNotFound):
         print('Are you sure your in an initialized git directory?')
