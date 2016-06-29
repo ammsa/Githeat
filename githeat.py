@@ -155,125 +155,103 @@ def graph_block(day_contribution_map):
 
     sorted_nomr_daily_contribution = sorted(day_contribution_map)
 
-    streched_days = []
-    copy_sorted_nomr_daily_contribution = copy.deepcopy(sorted_nomr_daily_contribution)
-    for i in range(1, 55):
-        first_seven_day_of_year = []
-        for j in range(7):
-            try:
-                first_seven_day_of_year.append(copy_sorted_nomr_daily_contribution.pop(0))
-            except IndexError:
-                #  less than a week
-                break
+    days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
+            'Thursday', 'Friday', 'Saturday']
 
-        for current_day in first_seven_day_of_year:
-            norm_day_contribution = int(day_contribution_map[current_day])
-            color = COLORS[norm_day_contribution]
-            streched_days.append((current_day, colorize(BLOCK_WIDTH,
+    class Column:
+
+        def __init__(self, full_empty_col=False):
+            if full_empty_col:
+                self.col = [[None, BLOCK_WIDTH]] * 7
+            else:
+                self.col = []
+
+        def append(self, val):
+            if len(self.col) >= 7:
+                raise ValueError("Can't add more than 7 days")
+            self.col.append(val)
+
+        def fill(self):
+            while len(self.col) != 7:
+                self.col += [[None, BLOCK_WIDTH]]
+
+        def fill_by(self, first_x):
+            self.col += [[None, BLOCK_WIDTH]] * first_x
+
+        def __len__(self):
+            return len(self.col)
+
+        def __str__(self):
+            result = ""
+            for c in self.col:
+                result += str(c[0]) + "\n"
+            return result
+
+        def __repr__(self):
+            if self.col:
+                return "Week of {}".format(self.col[0][0])
+            else:
+                return "Empty col"
+
+    matrix = []
+    first_day = sorted_nomr_daily_contribution[0]
+    if first_day.strftime("%A") != "Sunday":
+        c = Column()
+        d = first_day - datetime.timedelta(days=1)
+        while d.strftime("%A") != "Saturday":
+            d = d - datetime.timedelta(days=1)
+            c.append([None, BLOCK_WIDTH])
+        matrix.append(c)
+    else:
+        new_column = Column()
+        matrix.append(new_column)
+
+    for current_day in sorted_nomr_daily_contribution:
+        last_week_col = matrix[-1]
+        norm_day_contribution = int(day_contribution_map[current_day])
+        color = COLORS[norm_day_contribution]
+
+        try:
+            last_week_col.append([current_day, colorize(BLOCK_WIDTH,
                                                         ansi=0,
-                                                        ansi_bg=color)))
-    if MONTH_SEPARATION:
+                                                        ansi_bg=color)])
 
-        days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
-                'Thursday', 'Friday', 'Saturday']
-
-        class Column:
-
-            def __init__(self, full_empty_col=False):
-                if full_empty_col:
-                    self.col = [[None, BLOCK_WIDTH]] * 7
-                else:
-                    self.col = []
-
-            def append(self, val):
-                if len(self.col) >= 7:
-                    raise ValueError("Can't add more than 7 days")
-                self.col.append(val)
-
-            def fill(self):
-                while len(self.col) != 7:
-                    self.col += [[None, BLOCK_WIDTH]]
-
-            def fill_by(self, first_x):
-                self.col += [[None, BLOCK_WIDTH]] * first_x
-
-            def __len__(self):
-                return len(self.col)
-
-            def __str__(self):
-                result = ""
-                for c in self.col:
-                    result += str(c[0]) + "\n"
-                return result
-
-            def __repr__(self):
-                if self.col:
-                    return "Week of {}".format(self.col[0][0])
-                else:
-                    return "Empty col"
-
-        matrix = []
-        first_day = sorted_nomr_daily_contribution[0]
-        if first_day.strftime("%A") != "Sunday":
-            c = Column()
-            d = first_day - datetime.timedelta(days=1)
-            while d.strftime("%A") != "Saturday":
-                d = d - datetime.timedelta(days=1)
-                c.append([None, BLOCK_WIDTH])
-            matrix.append(c)
-        else:
+        except ValueError:
             new_column = Column()
             matrix.append(new_column)
-
-        for current_day in sorted_nomr_daily_contribution:
             last_week_col = matrix[-1]
-            norm_day_contribution = int(day_contribution_map[current_day])
-            color = COLORS[norm_day_contribution]
+            last_week_col.append([current_day, colorize(BLOCK_WIDTH,
+                                                        ansi=0,
+                                                        ansi_bg=color)])
 
-            try:
-                last_week_col.append([current_day, colorize(BLOCK_WIDTH,
-                                                            ansi=0,
-                                                            ansi_bg=color)])
+        next_day = current_day + datetime.timedelta(days=1)
+        if next_day.month != current_day.month:
+            # if week isn't 7 days, fill it with empty blocks
+            last_week_col.fill()
 
-            except ValueError:
-                new_column = Column()
-                matrix.append(new_column)
-                last_week_col = matrix[-1]
-                last_week_col.append([current_day, colorize(BLOCK_WIDTH,
-                                                            ansi=0,
-                                                            ansi_bg=color)])
+            #  make new empty col to separate months
+            matrix.append(Column(full_empty_col=True))
 
-            next_day = current_day + datetime.timedelta(days=1)
-            if next_day.month != current_day.month:
-                # if week isn't 7 days, fill it with empty blocks
-                last_week_col.fill()
+            matrix.append(Column())
+            last_week_col = matrix[-1]
 
-                #  make new empty col to separate months
-                matrix.append(Column(full_empty_col=True))
+            #  if next_day (which is first day of new month) starts in middle of the
+            #  week, prepend empty blocks in the next col before inserting 'next day'
+            next_day_num = days.index(next_day.strftime("%A"))
+            last_week_col.fill_by(next_day_num)
 
-                matrix.append(Column())
-                last_week_col = matrix[-1]
+    #  make sure that most current week (last col of matrix) col is of size 7,
+    #  so fill it if it's not
+    matrix[-1].fill()
 
-                #  if next_day (which is first day of new month) starts in middle of the
-                #  week, prepend empty blocks in the next col before inserting 'next day'
-                next_day_num = days.index(next_day.strftime("%A"))
-                last_week_col.fill_by(next_day_num)
+    for i in range(7):
+        for week in matrix:
+            if not MONTH_SEPARATION:
+                if week.col[i][1] == BLOCK_WIDTH:
+                    continue
 
-        #  make sure that most current week (last col of matrix) col is of size 7,
-        #  so fill it if it's not
-        matrix[-1].fill()
-
-        for i in range(7):
-            for week in matrix:
-                print("{}{}".format(week.col[i][1], BLOCK_SEPARATION_SHOW), end="")
-            print("{}".format("\n" if BLOCK_SEPARATION_SHOW else ''))
-
-    else:
-        for i in range(0, 6):
-            for j in range(i, len(streched_days), 7):
-                print("{}{}".format(streched_days[j][1], BLOCK_SEPARATION_SHOW), end="")
-            print("{}".format("\n" if BLOCK_SEPARATION_SHOW else ''))
-
+            print("{}{}".format(week.col[i][1], BLOCK_SEPARATION_SHOW), end="")
+        print("{}".format("\n" if BLOCK_SEPARATION_SHOW else ''))
 
 
 def main():
@@ -286,9 +264,23 @@ def main():
                         default='block')
 
     parser.add_argument('--width', '-w',
-                        choices=['thick', 'regular', 'thin'],
+                        choices=['thick', 'reg', 'thin'],
                         help='Choose how wide you want the graph blocks to be',
-                        default='regular')
+                        default='reg')
+
+    parser.add_argument('--color', '-c',
+                        choices=['thick', 'reg', 'thin'],
+                        help='Choose how wide you want the graph blocks to be',
+                        default='reg')
+
+    parser.add_argument('--single', '-s', dest='single',
+                        action='store_true',
+                        help='Separate each day',
+                        default=False)
+    parser.add_argument('--merge', '-m', dest='merge',
+                        action='store_true',
+                        help='Separate each month',
+                        default=False)
 
     parser.add_argument('--author', '-a',
                         help='Filter heatmap by author. You can also write regex here')
@@ -304,16 +296,26 @@ def main():
 
         if cli.width.lower() == 'thick':
             BLOCK_WIDTH = BLOCK_THICK
-        elif cli.width.lower() == 'regular':
+        elif cli.width.lower() == 'reg':
             BLOCK_WIDTH = BLOCK_REG
         else:
             BLOCK_WIDTH = BLOCK_THIN
 
+    if cli.single:
+        global BLOCK_SEPARATION
+        global BLOCK_SEPARATION_SHOW
+        BLOCK_SEPARATION = True
+        BLOCK_SEPARATION_SHOW = ' ' if BLOCK_SEPARATION else ''
+
+    if cli.merge:
+        global MONTH_SEPARATION
+        MONTH_SEPARATION = False
+
     author = cli.author
 
     try:
-        g = Git('/Users/mustafa/Repos/groppus')
-        git_log_args = ["--since=1.year",
+        g = Git('/Users/mustafa/Repos/legacy-homebrew')
+        git_log_args = ["--since=1 year 7 days",
                         "--pretty=format:'%ci'"]
         if author:
             git_log_args.append('--author={}'.format(author))
