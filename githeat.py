@@ -154,7 +154,6 @@ def graph_block(day_contribution_map):
     #     print_graph_month_header()
 
     sorted_nomr_daily_contribution = sorted(day_contribution_map)
-    print(sorted_nomr_daily_contribution[0])
 
     streched_days = []
     copy_sorted_nomr_daily_contribution = copy.deepcopy(sorted_nomr_daily_contribution)
@@ -177,70 +176,12 @@ def graph_block(day_contribution_map):
 
         days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
                 'Thursday', 'Friday', 'Saturday']
-        months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-        days_buckets = {}
-        for d in days:
-            days_buckets[d] = []
-
-        months_bucket = {}
-
-        for m in months:
-            months_bucket[m] = copy.deepcopy(days_buckets)
-
-        today_year = datetime.date.today()
-        last_year = (today_year - relativedelta(years=1))
-
-        years_bucket = {
-            today_year.year: copy.deepcopy(months_bucket),
-            last_year.year: copy.deepcopy(months_bucket),
-        }
-
-        #  fill in buckets
-        for i in range(-1, 6):  # going day by day
-            for j in range(i, len(streched_days), 7):  # jumping week by week
-                day_color_pair = streched_days[j]
-                day = day_color_pair[0]
-                years_bucket[day.year][day.strftime("%b")][day.strftime("%A")].append(
-                        day_color_pair)
-
-        #  init months width dict
-        months_width = {}
-        for y in [today_year.year, last_year.year]:
-            for m in months:
-                key = datetime.date(y, get_month_from_abbrv(m), 1)
-                months_width[key] = 0
-
-        for y in years_bucket:
-            for m in years_bucket[y]:
-                width = max([len(x) for x in years_bucket[y][m].values()])
-                key = datetime.date(y, get_month_from_abbrv(m), 1)
-                months_width[key] = width
-
-        #  remove un-used keys
-        months_width = {k: v for k, v in months_width.items() if v}
-
-        print('Months widths:')
-        for mw in months_width:
-            print("{}  {}".format(mw, months_width[mw]))
-        print()
-
-        print("Months order")
-        months_order = get_months_with_last_same_as_first(datetime.date.today(),
-                                                          12,
-                                                          include_year=True)
-        months_order.reverse()
-
-        print(months_order)
-        print()
-
-        # TODO: Separate months by space
         class Column:
 
             def __init__(self, full_empty_col=False):
                 if full_empty_col:
-                    self.col = [[None, " "]] * 7
+                    self.col = [[None, BLOCK_WIDTH]] * 7
                 else:
                     self.col = []
 
@@ -271,9 +212,7 @@ def graph_block(day_contribution_map):
                 else:
                     return "Empty col"
 
-
         matrix = []
-
         first_day = sorted_nomr_daily_contribution[0]
         if first_day.strftime("%A") != "Sunday":
             c = Column()
@@ -295,10 +234,8 @@ def graph_block(day_contribution_map):
                 last_week_col.append([current_day, colorize(BLOCK_WIDTH,
                                                             ansi=0,
                                                             ansi_bg=color)])
-                # print(last_week_col)
 
             except ValueError:
-                # print('value error occured')
                 new_column = Column()
                 matrix.append(new_column)
                 last_week_col = matrix[-1]
@@ -308,40 +245,35 @@ def graph_block(day_contribution_map):
 
             next_day = current_day + datetime.timedelta(days=1)
             if next_day.month != current_day.month:
+                # if week isn't 7 days, fill it with empty blocks
                 last_week_col.fill()
-                new_column = Column()
-                new_column.fill()
-                matrix.append(new_column)
-                new_column = Column()
-                matrix.append(new_column)
+
+                #  make new empty col to separate months
+                matrix.append(Column(full_empty_col=True))
+
+                matrix.append(Column())
                 last_week_col = matrix[-1]
+
+                #  if next_day (which is first day of new month) starts in middle of the
+                #  week, prepend empty blocks in the next col before inserting 'next day'
                 next_day_num = days.index(next_day.strftime("%A"))
                 last_week_col.fill_by(next_day_num)
-            elif len(last_week_col) != 7 and next_day.strftime("%A") == 'Sunday':
-                last_week_col.fill()
-                new_column = Column()
-                matrix.append(new_column)
-                last_week_col = matrix[-1]
 
-
-        # print(matrix)
+        #  make sure that most current week (last col of matrix) col is of size 7,
+        #  so fill it if it's not
         matrix[-1].fill()
-        print(matrix[0].col)
 
         for i in range(7):
             for week in matrix:
-                print(week.col[i][1], end="")
-
-            print()
+                print("{}{}".format(week.col[i][1], BLOCK_SEPARATION_SHOW), end="")
+            print("{}".format("\n" if BLOCK_SEPARATION_SHOW else ''))
 
     else:
-
         for i in range(0, 6):
             for j in range(i, len(streched_days), 7):
                 print("{}{}".format(streched_days[j][1], BLOCK_SEPARATION_SHOW), end="")
             print("{}".format("\n" if BLOCK_SEPARATION_SHOW else ''))
 
-    print()
 
 
 def main():
