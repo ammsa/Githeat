@@ -118,7 +118,7 @@ class Githeat:
         Parses the 'git_repo' git log
 
         """
-        logger.debug("parsing {} git log".format(self.git_repo.name))
+        logger.debug("parsing git log")
 
         git_log_args = ["--since=1 year 7 days",
                         "--pretty=format:'%ci ~ %an'"]
@@ -153,7 +153,7 @@ class Githeat:
         """
         Compute how many commits were committed on each day
         """
-        logger.debug("Computing {} contributions".format(self.git_repo.name))
+        logger.debug("Computing contributions")
 
         self.day_contribution_map = defaultdict(float)
 
