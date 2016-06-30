@@ -87,7 +87,6 @@ class Githeat:
 
         self.stat = stat
         self.stat_number = stat_number
-        self.separate = separate
         self.block_separation_show = ' ' if separate else ''
         self.month_merge = month_merge
         self.author = author
@@ -96,7 +95,7 @@ class Githeat:
 
         self.commits_db = None
         self.commits_dates = None
-        self.day_contribution_map = None
+        self.daily_contribution_map = None
 
         if width:
             if width == 'thick':
@@ -155,7 +154,7 @@ class Githeat:
         """
         logger.debug("Computing contributions")
 
-        self.day_contribution_map = defaultdict(float)
+        self.daily_contribution_map = defaultdict(float)
 
         today = datetime.date.today()
         last_year = today - relativedelta(years=1, days=7)
@@ -172,19 +171,19 @@ class Githeat:
                 else:
                     flag_skip_til_first_sunday = False
 
-            self.day_contribution_map[current_day] = 0.0
+            self.daily_contribution_map[current_day] = 0.0
 
         # update dict with contributions
         for dt in self.commits_dates:
             contribution_day = datetime.date(dt.year, dt.month, dt.day)
-            if contribution_day in self.day_contribution_map:
-                self.day_contribution_map[contribution_day] += 1.0
+            if contribution_day in self.daily_contribution_map:
+                self.daily_contribution_map[contribution_day] += 1.0
 
     def normalize_daily_contribution_map(self):
         logger.debug("Normalizing contributions")
 
         # normalize values between [0, 5] because we have six colors
-        self.day_contribution_map = helpers.normalize(self.day_contribution_map, 0, 5)
+        self.daily_contribution_map = helpers.normalize(self.daily_contribution_map, 0, 5)
 
     def print_graph_month_header(self):
         """
@@ -209,9 +208,9 @@ class Githeat:
         """
         logger.debug("Printing graph")
 
-        sorted_nomr_daily_contribution = sorted(self.day_contribution_map)
+        sorted_normalized_daily_contribution = sorted(self.daily_contribution_map)
         matrix = []
-        first_day = sorted_nomr_daily_contribution[0]
+        first_day = sorted_normalized_daily_contribution[0]
         if first_day.strftime("%A") != "Sunday":
             c = self._Column(self.width)
             d = first_day - datetime.timedelta(days=1)
@@ -222,17 +221,17 @@ class Githeat:
         else:
             new_column = self._Column(self.width)
             matrix.append(new_column)
-        for current_day in sorted_nomr_daily_contribution:
+        for current_day in sorted_normalized_daily_contribution:
             last_week_col = matrix[-1]
-            norm_day_contribution = int(self.day_contribution_map[current_day])
-            color = self.color[norm_day_contribution]
+            day_contribution_color_index = int(self.daily_contribution_map[current_day])
+            color = self.color[day_contribution_color_index]
 
             try:
                 last_week_col.append([current_day, colorize(self.width,
                                                             ansi=0,
                                                             ansi_bg=color)])
 
-            except ValueError:
+            except ValueError:  # column (e.g. week) has ended
                 new_column = self._Column(self.width)
                 matrix.append(new_column)
                 last_week_col = matrix[-1]
@@ -242,28 +241,31 @@ class Githeat:
 
             next_day = current_day + datetime.timedelta(days=1)
             if next_day.month != current_day.month:
-                # if week isn't 7 days, fill it with empty blocks
+                #  if the column we're at isn't 7 days yet, fill it with empty blocks
                 last_week_col.fill()
 
                 #  make new empty col to separate months
                 matrix.append(self._Column(self.width, full_empty_col=True))
 
                 matrix.append(self._Column(self.width))
-                last_week_col = matrix[-1]
+                last_week_col = matrix[-1]  # update to the latest column
 
                 #  if next_day (which is first day of new month) starts in middle of the
-                #  week, prepend empty blocks in the next col before inserting 'next day'
+                #  week, prepend empty blocks in the column before inserting 'next day'
                 next_day_num = days.index(next_day.strftime("%A"))
                 last_week_col.fill_by(next_day_num)
 
-        # make sure that most current week (last col of matrix) col is of size 7,
+        #  make sure that the most current week (last col of matrix) col is of size 7,
         #  so fill it if it's not
         matrix[-1].fill()
 
+        #  for each day of the week
         for i in range(7):
+            #  for the week column in the matrix
             for week in matrix:
 
                 if not self.month_merge:
+                    #  check if value in that week is just empty spaces and not colorize
                     if week.col[i][1] == self.width:
                         continue
 
@@ -277,9 +279,9 @@ class Githeat:
         """
         logger.debug("Printing inline")
 
-        sorted_nomr_daily_contribution = sorted(self.day_contribution_map)
-        for current_day in sorted_nomr_daily_contribution:
-            norm_day_contribution = int(self.day_contribution_map[current_day])
+        sorted_normalized_daily_contribution = sorted(self.daily_contribution_map)
+        for current_day in sorted_normalized_daily_contribution:
+            norm_day_contribution = int(self.daily_contribution_map[current_day])
             color = self.color[norm_day_contribution]
             print(colorize(self.width, ansi=0, ansi_bg=color),
                   end=" {}{}".format(current_day.strftime("%b %d, %Y"), '\n')
