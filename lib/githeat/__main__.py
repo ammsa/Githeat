@@ -71,11 +71,12 @@ def _cmdline(argv=None):
                         type=str,
                         dest='days',
                         nargs='+',
-                        help="Choose what day to show. Please enter day abbreviation")
+                        help="Choose what days to show. Please enter list of day "
+                             "abbreviations or full name of week")
 
     parser.add_argument('--color',
                         choices=['grass', 'fire', 'sky'],
-                        help='Choose how wide you want the graph blocks to be',
+                        help='Choose type of coloring you want for your graph',
                         default='grass')
 
     parser.add_argument('--stat-number',
