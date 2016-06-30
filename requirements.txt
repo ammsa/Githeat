@@ -1,0 +1,5 @@
+## Python requirements for using the githeat application.
+##
+##    pip install --requirement=requirements.txt
+##
+PyYAML>=3.11

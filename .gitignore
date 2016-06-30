@@ -1,0 +1,43 @@
+# Python
+
+MANIFEST
+build/
+dist/
+*.egg-info/
+*.pyc
+*.pyo
+
+
+# py.test
+
+.cache/
+
+
+# Sphinx
+
+_build/
+_static/
+_templates/
+
+
+# virtualenv
+
+venv*/
+
+
+# Vagrant
+
+.vagrant/
+
+
+# IDE settings
+
+.idea/
+.project/
+.pydevproject/
+nbproject/
+
+
+# OS-specific
+
+.DS_Store
