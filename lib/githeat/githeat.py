@@ -114,6 +114,10 @@ class Githeat:
         logger.debug("initialing githeat instance")
 
     def parse_commits(self):
+        """
+        Parses the 'git_repo' git log
+
+        """
         logger.debug("parsing {} git log".format(self.git_repo.name))
 
         git_log_args = ["--since=1 year 7 days",
@@ -146,6 +150,9 @@ class Githeat:
         self.commits_dates = commits_db.keys()
 
     def compute_daily_contribution_map(self):
+        """
+        Compute how many commits were committed on each day
+        """
         logger.debug("Computing {} contributions".format(self.git_repo.name))
 
         self.day_contribution_map = defaultdict(float)
@@ -181,8 +188,8 @@ class Githeat:
 
     def print_graph_month_header(self):
         """
-        Prints and returns a list of months abbreviations
-        :return:
+        Prints and returns a list of months abbreviations header
+
         """
         # TODO: align months correctly with its month block
         # months = get_months_with_last_same_as_first(datetime.date.today(), 12)
@@ -196,6 +203,10 @@ class Githeat:
         raise NotImplementedError
 
     def print_graph(self):
+        """
+        Prints contribution graph
+
+        """
         logger.debug("Printing graph")
 
         sorted_nomr_daily_contribution = sorted(self.day_contribution_map)
@@ -273,9 +284,12 @@ class Githeat:
             print(colorize(self.width, ansi=0, ansi_bg=color),
                   end=" {}{}".format(current_day.strftime("%b %d, %Y"), '\n')
                   )
-    
 
     def print_stats(self):
+        """
+        Prints contribution statistics
+
+        """
         logger.debug("Printing stats")
 
         commits_authors = [c.author for c in
@@ -288,7 +302,10 @@ class Githeat:
                 print("{}. {}: {}".format(idx+1, info[0], info[1]))
 
     def run(self):
+        """
+        Githeat execution logic
 
+        """
         self.parse_commits()
         self.compute_daily_contribution_map()
         self.normalize_daily_contribution_map()
