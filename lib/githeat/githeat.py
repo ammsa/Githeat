@@ -111,10 +111,10 @@ class Githeat:
                 self.color = COLORS_FIRE
 
         logger.start(logging_level)
-        logger.info("initialing githeat instance")
+        logger.debug("initialing githeat instance")
 
     def parse_commits(self):
-        logger.info("parsing {} git log".format(self.git_repo.name))
+        logger.debug("parsing {} git log".format(self.git_repo.name))
 
         git_log_args = ["--since=1 year 7 days",
                         "--pretty=format:'%ci ~ %an'"]
@@ -146,7 +146,7 @@ class Githeat:
         self.commits_dates = commits_db.keys()
 
     def compute_daily_contribution_map(self):
-        logger.info("Computing {} contributions".format(self.git_repo.name))
+        logger.debug("Computing {} contributions".format(self.git_repo.name))
 
         self.day_contribution_map = defaultdict(float)
 
@@ -174,7 +174,7 @@ class Githeat:
                 self.day_contribution_map[contribution_day] += 1.0
 
     def normalize_daily_contribution_map(self):
-        logger.info("Normalizing contributions")
+        logger.debug("Normalizing contributions")
 
         # normalize values between [0, 5] because we have six colors
         self.day_contribution_map = helpers.normalize(self.day_contribution_map, 0, 5)
@@ -196,6 +196,7 @@ class Githeat:
         raise NotImplementedError
 
     def print_graph(self):
+        logger.debug("Printing graph")
 
         sorted_nomr_daily_contribution = sorted(self.day_contribution_map)
         matrix = []
@@ -263,20 +264,20 @@ class Githeat:
         Prints a whole year of contribution in inline form
 
         """
+        logger.debug("Printing inline")
+
         sorted_nomr_daily_contribution = sorted(self.day_contribution_map)
-        for day in sorted_nomr_daily_contribution:
-            for i in range(0, 54 * 7):
-                current_day = day + datetime.timedelta(days=i)
-                if current_day <= datetime.date.today():
-                    norm_day_contribution = int(self.day_contribution_map[current_day])
-                    color = self.color[norm_day_contribution]
-                    print(colorize(self.width, ansi=0, ansi_bg=color),
-                          end=" {}{}".format(current_day.strftime("%b %d, %Y"), '\n')
-                          )
-            print()
-            break
+        for current_day in sorted_nomr_daily_contribution:
+            norm_day_contribution = int(self.day_contribution_map[current_day])
+            color = self.color[norm_day_contribution]
+            print(colorize(self.width, ansi=0, ansi_bg=color),
+                  end=" {}{}".format(current_day.strftime("%b %d, %Y"), '\n')
+                  )
+    
 
     def print_stats(self):
+        logger.debug("Printing stats")
+
         commits_authors = [c.author for c in
                            list(itertools.chain.from_iterable(self.commits_db.values()))]
         counter = Counter(commits_authors)
@@ -287,6 +288,7 @@ class Githeat:
                 print("{}. {}: {}".format(idx+1, info[0], info[1]))
 
     def run(self):
+
         self.parse_commits()
         self.compute_daily_contribution_map()
         self.normalize_daily_contribution_map()
