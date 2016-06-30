@@ -74,7 +74,7 @@ class Githeat:
 
     def __init__(self, git_repo,
                  gtype='block', width='reg', days=None, color='grass',
-                 stat=False, stat_number=5, separate=True, month_by_month=False,
+                 stat=False, stat_number=5, separate=True, month_merge=False,
                  author=None, config=None, logging_level="CRITICAL"
                  ):
 
@@ -89,7 +89,7 @@ class Githeat:
         self.stat_number = stat_number
         self.separate = separate
         self.block_separation_show = ' ' if separate else ''
-        self.month_by_month = month_by_month
+        self.month_merge = month_merge
         self.author = author
 
         self.config = config
@@ -263,7 +263,7 @@ class Githeat:
         for i in range(7):
             for week in matrix:
 
-                if not self.month_by_month:
+                if not self.month_merge:
                     if week.col[i][1] == self.width:
                         continue
 

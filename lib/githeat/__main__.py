@@ -96,9 +96,9 @@ def _cmdline(argv=None):
                         help='Separate each day',
                         default=False)
 
-    parser.add_argument('--month-by-month',
-                        dest='month_by_month',
-                        action='store_true',
+    parser.add_argument('--month-merge',
+                        dest='month_merge',
+                        action='store_false',
                         help='Separate each month',
                         default=True)
 
