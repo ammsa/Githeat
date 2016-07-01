@@ -57,12 +57,6 @@ def _cmdline(argv=None):
     parser = ArgumentParser(prog="githeat.py",
                             description='githeat: Terminal Heatmap for your git repos')
 
-    parser.add_argument('--gtype',
-                        action="store",
-                        choices=['inline', 'block'],
-                        help='Choose how you want the graph to be displayed',
-                        default='block')
-
     parser.add_argument('--width',
                         action="store",
                         choices=['thick', 'reg', 'thin'],
@@ -93,17 +87,11 @@ def _cmdline(argv=None):
                         help='Show commits stat',
                         default=False)
 
-    parser.add_argument('--separate', '-b',
-                        dest='separate',
-                        action='store_true',
-                        help='Separate each day',
-                        default=False)
-
     parser.add_argument('--month-merge',
                         dest='month_merge',
-                        action='store_false',
+                        action='store_true',
                         help='Separate each month',
-                        default=True)
+                        default=False)
 
     parser.add_argument('--author', '-a',
                         help='Filter heatmap by author. You can also write regex here')
@@ -153,6 +141,7 @@ except TypeError:
         """Display ``text`` and flush output."""
         sys.stdout.write(u'{}'.format(text))
         sys.stdout.flush()
+
 
 #
 # def input_filter(keystroke):
@@ -244,11 +233,28 @@ def redraw(term, screen, start=None, end=None):
                 echo(screen[row, col])
 
 
-def print_graph_legend(starting_x, y, colors, term):
+def top_authors_to_string(top_authors, colors=None):
+    authors_colorized = []
+    if top_authors:
+        for tup in top_authors:
+            if colors:
+                author_string = colorize(tup[0],
+                                         ansi=colors[int(tup[1])])
+            else:
+                author_string = tup[0]
+            authors_colorized.append(author_string)
+
+    top_n_authors = ", ".join(authors_colorized)
+    return top_n_authors
+
+
+def print_graph_legend(starting_x, y, width,block_seperation_width, colors, screen, term):
     for color in colors:
         c = Cursor(y, starting_x, term)
-        echo_yx(c, colorize("  ", ansi=color, ansi_bg=color))
-        starting_x += 4
+        value = colorize(width, ansi=color, ansi_bg=color)
+        echo_yx(c, value)
+        screen[y, starting_x] = value
+        starting_x += block_seperation_width
 
 
 def within_boundary(boundary_right_most_x, boundary_top_most_y,
@@ -347,14 +353,14 @@ def main(argv=None):
         csr.term.KEY_LR: below(right_of(csr, 1), 1),
         csr.term.KEY_KP_3: below(right_of(csr, 1), 1),
 
-        csr.term.KEY_LEFT: left_of(csr, 2),
-        csr.term.KEY_KP_4: left_of(csr, 2),
+        csr.term.KEY_LEFT: left_of(csr, len(githeat.width)),
+        csr.term.KEY_KP_4: left_of(csr, len(githeat.width)),
 
         csr.term.KEY_CENTER: center(csr),
         csr.term.KEY_KP_5: center(csr),
 
-        csr.term.KEY_RIGHT: right_of(csr, 2),
-        csr.term.KEY_KP_6: right_of(csr, 2),
+        csr.term.KEY_RIGHT: right_of(csr, len(githeat.width)),
+        csr.term.KEY_KP_6: right_of(csr, len(githeat.width)),
 
         csr.term.KEY_HOME: above(left_of(csr, 1), 1),
         csr.term.KEY_KP_7: above(left_of(csr, 1), 1),
@@ -366,13 +372,13 @@ def main(argv=None):
         csr.term.KEY_KP_9: above(right_of(csr, 1), 1),
 
         # shift + arrows
-        csr.term.KEY_SLEFT: left_of(csr, 10),
-        csr.term.KEY_SRIGHT: right_of(csr, 10),
-        csr.term.KEY_SDOWN: below(csr, 10),
-        csr.term.KEY_SUP: above(csr, 10),
+        csr.term.KEY_SLEFT: left_of(csr, 6),
+        csr.term.KEY_SRIGHT: right_of(csr, 6),
+        csr.term.KEY_SDOWN: below(csr, 4),
+        csr.term.KEY_SUP: above(csr, 4),
 
         # carriage return
-        csr.term.KEY_ENTER: home(below(csr, 1)),
+        # csr.term.KEY_ENTER: home(below(csr, 1)),
     }.get(inp_code, csr)
 
     #  get repo
@@ -384,8 +390,16 @@ def main(argv=None):
     matrix = githeat.get_graph_matrix()
 
     term = Terminal()
-    csr = Cursor(term.height // 2, term.width // 2, term)
-    new_width = (term.width - len(matrix) * 2) // 2
+    if githeat.month_merge:
+        if len(githeat.width) == 1:  # thin
+            new_width = (term.width - len(matrix) + (11 * 2)) // 2
+        else:
+            new_width = (term.width - len(matrix) - 11 * 2) // 2
+    else:
+        if len(githeat.width) == 1:  # thin
+            new_width = (term.width - len(matrix)) // 2
+        else:
+            new_width = (term.width - len(matrix) * 2) // 2
     csr = Cursor(term.height // 2 - 3, new_width, term)
 
     screen = {}
@@ -398,14 +412,33 @@ def main(argv=None):
 
         # inp = None
 
-        # Print header
-        echo_yx(home(top(csr)),
-                term.ljust(term.bold_white(unicode(os.getcwd()))))
+        # Print header left
+        header_left = unicode(os.getcwd())
+        location = home(top(csr))
+        value = term.bold(header_left)
+        echo_yx(location, value)
+        screen[location.y, location.x] = value
 
-        echo_yx(top(center(csr)),
-                term.ljust(term.bold_white(u'GitHeat {}'.format(__version__))))
-        echo_yx(right_of(top(center(csr)), len(u'GitHeat')), u'')
+        # Print header center
+        header_center = u'GitHeat {}'.format(__version__)
+        location = Cursor(0, (term.width // 2) - len(header_center) // 2, term)
+        value = term.bold(header_center)
+        echo_yx(location, value)
+        screen[location.y, location.x] = value
 
+        # Print header right
+        header_right = u'^c or q to exit'
+        location = Cursor(0, term.width - len(header_right), term)
+        value = term.ljust(term.bold(header_right))
+        echo_yx(location, value)
+        screen[location.y, location.x] = value
+
+        # Print footer
+        footer = term.bold(u'Please move cursor to navigate through map')
+        location = home(bottom(csr))
+        value = term.ljust(footer)
+        echo_yx(location, value)
+        screen[location.y, location.x] = term.ljust(footer)
 
         graph_right_most_x = term.width  # initialized at terminal width
         graph_left_most_x = csr.x
@@ -420,43 +453,46 @@ def main(argv=None):
             #  for the week column in the matrix
             for week in matrix:
 
-                if not githeat.month_merge:
+                if githeat.month_merge:
                     #  check if value in that week is just empty spaces and not colorize
                     if week.col[i][1] == githeat.width:
                         continue
+
                 c = Cursor(y, x, term)
-                value = "{}".format(week.col[i][1])
-                if value == '  ':
-                    pass
-                else:
-                    value = week.col[i][1]
-                    screen[(c.y, c.x)] = value
-                    screen_dates[(c.y, c.x)] = week.col[i][0]
+                value = week.col[i][1]
+                screen[(c.y, c.x)] = value
+                screen_dates[(c.y, c.x)] = week.col[i][0]
 
                 echo_yx(c, value)
 
-                x += 2
+                x += len(githeat.width)
 
-            graph_right_most_x = x - 2
+            graph_right_most_x = x
             #  reset x
             x = graph_left_most_x
             y += 1
         graph_bottom_most_y = y - 1
 
         # print legend
-        x = (term.width - len(githeat.colors) * 4) // 2
+        block_seperation_width = 4
+        x = (term.width - len(githeat.colors) * block_seperation_width) // 2
         y = graph_bottom_most_y + 5
-        print_graph_legend(x, y, githeat.colors, term)
-
+        print_graph_legend(x, y,
+                           githeat.width,
+                           block_seperation_width,
+                           githeat.colors,
+                           screen,
+                           term)
 
         while True:
-            cursor_color = colorize("  ", ansi=15, ansi_bg=15)
+            cursor_color = colorize(githeat.width, ansi=15, ansi_bg=15)
             echo_yx(csr, cursor_color)
             inp = term.inkey()
 
-            if inp == chr(3):
-                # ^c exits
+            if inp in [chr(3), chr(81), chr(113)]:
+                # ^c or q or Q to exits
                 break
+
 
             # elif inp == chr(19):
             #     # ^s saves
@@ -474,8 +510,7 @@ def main(argv=None):
             #     # ^l refreshes
             #     redraw(term=term, screen=screen)
 
-            else:
-                n_csr = lookup_move(inp.code, csr, term)
+            n_csr = lookup_move(inp.code, csr, term)
 
             # check if cursor new move is within our graph boundaries
             if not within_boundary(graph_right_most_x, graph_top_most_y,
@@ -484,12 +519,26 @@ def main(argv=None):
                 continue
 
             # get value at new cursor block, if it exists
-            next_value = screen_dates.get((n_csr.y, n_csr.x))
-            if next_value:
+            new_cursor_date_value = screen_dates.get((n_csr.y, n_csr.x))
+            if new_cursor_date_value:
                 # Cursor is on a date with commits
-                echo_yx(home(bottom(csr)),
-                        term.ljust(term.bold_white(unicode(next_value))))
-                echo_yx(right_of(home(bottom(csr)), len(unicode(next_value))), u'')
+                top_5 = githeat.get_top_n_commiters(
+                        githeat.commits_db.get(new_cursor_date_value),
+                        normailze_values=True,
+                        n=5
+                )
+                info = top_authors_to_string(top_5, colors=githeat.colors)
+                if info:
+                    info = term.bold_white("Top commiters: ") + info
+                else:
+                    info = "No commits"
+
+                footer = term.bold_white(unicode(new_cursor_date_value)) + ' ' + info
+                value = term.ljust(footer)
+                location = home(bottom(csr))
+                echo_yx(location, value)
+                screen[location.y, location.x] = value
+
             else:
                 # echo_yx(home(bottom(csr)), term.clear_eol)
                 # redraw(term=term, screen=screen,
@@ -497,11 +546,14 @@ def main(argv=None):
                 #        end=end(bottom(csr)))
 
                 horizontal_empty = False
-                while not next_value and within_boundary(graph_right_most_x - 1,
-                                                         graph_top_most_y,
-                                                         graph_left_most_x + 1,
-                                                         graph_bottom_most_y,
-                                                         n_csr):
+
+                #  jump through empty values
+                while not new_cursor_date_value and within_boundary(
+                                graph_right_most_x - 1,
+                                graph_top_most_y,
+                                graph_left_most_x + 1,
+                                graph_bottom_most_y,
+                                n_csr):
                     x = n_csr.x
                     y = n_csr.y
                     if n_csr.x > csr.x:
@@ -513,14 +565,25 @@ def main(argv=None):
                         break
 
                     n_csr = Cursor(y, x, term)
-                    next_value = screen_dates.get((n_csr.y, n_csr.x))
-                    if next_value:
-                        echo_yx(home(bottom(csr)),
-                        term.ljust(term.bold_white(unicode(next_value))))
-                        echo_yx(right_of(home(bottom(csr)), len(unicode(next_value))),
-                                u'')
+                    new_cursor_date_value = screen_dates.get((n_csr.y, n_csr.x))
+                    if new_cursor_date_value:
+                        top_5 = githeat.get_top_n_commiters(
+                            githeat.commits_db.get(new_cursor_date_value),
+                            normailze_values=True,
+                            n=5
+                        )
+                        info = top_authors_to_string(top_5, colors=githeat.colors)
+                        if info:
+                            info = term.bold_white("Top commiters: ") + info
+                        else:
+                            info = "No commits"
+                        footer = term.bold_white(unicode(new_cursor_date_value)) + \
+                                 ' ' + info
+                        value = term.ljust(footer)
+                        location = home(bottom(csr))
+                        echo_yx(location, value)
 
-                if horizontal_empty or not next_value:
+                if horizontal_empty or not new_cursor_date_value:
                     continue
 
             if n_csr != csr:
@@ -529,14 +592,45 @@ def main(argv=None):
                 echo_yx(csr, prev_value)
                 csr = n_csr
 
-            # elif input_filter(inp):
-            #     echo_yx(csr, inp)
-            #     screen[(csr.y, csr.x)] = inp.__str__()
-            #     n_csr = right_of(csr, 1)
-            #     if n_csr == csr:
-            #         # wrap around margin
-            #         n_csr = home(below(csr, 1))
-            #     csr = n_csr
+                # elif input_filter(inp):
+                #     echo_yx(csr, inp)
+                #     screen[(csr.y, csr.x)] = inp.__str__()
+                #     n_csr = right_of(csr, 1)
+                #     if n_csr == csr:
+                #         # wrap around margin
+                #         n_csr = home(below(csr, 1))
+                #     csr = n_csr
+
+            if inp == chr(13):
+                # Enter pressed on non empty date block
+                if githeat.commits_db.get(new_cursor_date_value):
+
+                    commits_desc_terminal = Terminal()
+                    with commits_desc_terminal.keypad():
+                        redraw(term=commits_desc_terminal, screen={})
+                        while True:
+                            # cursor_color = colorize(githeat.width, ansi=15, ansi_bg=15)
+                            echo_yx(Cursor(0,0, commits_desc_terminal), str(new_cursor_date_value))
+
+                            sinp = commits_desc_terminal.inkey()
+
+                            if sinp in [chr(3), chr(81), chr(113)]:
+                                break
+
+                        if sinp == chr(3):
+                            break
+                    redraw(term=term, screen=screen)
+                else:
+                    info = u'Please choose a date with contributions'
+                    footer = term.bold_white(unicode(new_cursor_date_value)) + ' ' + info
+                    value = term.ljust(footer)
+                    location = home(bottom(csr))
+                    echo_yx(location, value)
+                    screen[location.y, location.x] = value
+
+
+
+
 
     return 0
 

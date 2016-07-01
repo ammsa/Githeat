@@ -281,7 +281,7 @@ class Githeat:
             #  for the week column in the matrix
             for week in matrix:
 
-                if not self.month_merge:
+                if self.month_merge:
                     #  check if value in that week is just empty spaces and not colorize
                     if week.col[i][1] == self.width:
                         continue
