@@ -52,7 +52,8 @@ def _cmdline(argv=None):
             raise ArgumentTypeError("String '%s' does not match required "
                                     "format: day abbreviation" % (days,))
 
-    parser = ArgumentParser(description='githeat: Terminal Heatmap for your git repos')
+    parser = ArgumentParser(prog="githeat.py",
+                            description='githeat: Terminal Heatmap for your git repos')
 
     parser.add_argument('--gtype',
                         action="store",
@@ -145,7 +146,7 @@ def main(argv=None):
     config.load(args.config)
 
     try:
-        g = Git("/Users/mustafa/Repos/tensorflow")
+        g = Git(os.getcwd())
         githeat = Githeat(g, **vars(args))
         githeat.run()
 
