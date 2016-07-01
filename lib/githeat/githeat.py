@@ -94,7 +94,6 @@ class Githeat:
         self.config = config
 
         self.commits_db = None
-        self.commits_dates = None
         self.daily_contribution_map = None
 
         if width:
@@ -127,26 +126,25 @@ class Githeat:
         last_year_log_dates = self.git_repo.log(git_log_args)
 
         raw_commits = last_year_log_dates.replace("'", '').encode('utf-8').split("\n")
-        commits_db = {}  # holds commits by date as key
+        self.commits_db = {}  # holds commits by date as key
 
         if raw_commits and raw_commits[0]:
             for rc in raw_commits:
-                date, author = rc.split(" ~ ")
-                date = parse_date(date)
+                exact_date_and_time, author = rc.split(" ~ ")
+                author = author.decode('ascii', 'ignore')
+                exact_date_and_time = parse_date(exact_date_and_time)
 
-                if self.days and date.strftime("%A") not in self.days:
+                if self.days and exact_date_and_time.strftime("%A") not in self.days:
                     continue
 
-                commit = Commit(date, author)
-                if date in commits_db:
-                    commits_db[date].append(commit)
+                commit = Commit(exact_date_and_time, author)
+                if exact_date_and_time.date() in self.commits_db:
+                    self.commits_db[exact_date_and_time.date()].append(commit)
                 else:
-                    commits_db[date] = [commit]
+                    self.commits_db[exact_date_and_time.date()] = [commit]
         else:
             print('No contribution found')
             sys.exit(0)
-
-        self.commits_dates = commits_db.keys()
 
     def compute_daily_contribution_map(self):
         """
@@ -174,16 +172,20 @@ class Githeat:
             self.daily_contribution_map[current_day] = 0.0
 
         # update dict with contributions
-        for dt in self.commits_dates:
-            contribution_day = datetime.date(dt.year, dt.month, dt.day)
-            if contribution_day in self.daily_contribution_map:
-                self.daily_contribution_map[contribution_day] += 1.0
+        for commits_on_day in self.commits_db:
+            for commit in self.commits_db[commits_on_day]:
+                contribution_day = datetime.date(commit.date.year,
+                                                 commit.date.month,
+                                                 commit.date.day)
+                if contribution_day in self.daily_contribution_map:
+                    self.daily_contribution_map[contribution_day] += 1.0
 
     def normalize_daily_contribution_map(self):
         logger.debug("Normalizing contributions")
 
         # normalize values between [0, 5] because we have six colors
-        self.daily_contribution_map = helpers.normalize(self.daily_contribution_map, 0, 5)
+        self.daily_contribution_map = helpers.normalize_dict(self.daily_contribution_map,
+                                                             0, 5)
 
     def print_graph_month_header(self):
         """
@@ -294,19 +296,34 @@ class Githeat:
                   end=" {}{}".format(current_day.strftime("%b %d, %Y"), '\n')
                   )
 
+    def get_top_n_commiters(self, commits_list, n = 5, normailze_values=False):
+        """
+        Returns a list of names of the top n commiters from a list of commits
+        """
+        if not commits_list:
+            return None
+        commits_authors = [c.author for c in commits_list]
+        counter = Counter(commits_authors)
+        top_n = counter.most_common(n)
+        if normailze_values:
+            top_n = helpers.normalize_tuple_list(top_n, 1, 5)
+        return top_n
+
     def print_stats(self):
         """
         Prints contribution statistics
 
         """
         logger.debug("Printing stats")
+        n = self.stat_number if self.stat_number else 5
 
-        commits_authors = [c.author for c in
-                           list(itertools.chain.from_iterable(self.commits_db.values()))]
-        counter = Counter(commits_authors)
-        top_n = counter.most_common(self.stat_number)
+        top_n = self.get_top_n_commiters(
+                list(itertools.chain.from_iterable(self.commits_db.values())),
+                n
+        )
+
         if top_n:
-            print("Top {} committers:".format(self.stat_number))
+            print("Top {} committers:".format(n))
             for idx, info in enumerate(top_n):
                 print("{}. {}: {}".format(idx+1, info[0], info[1]))
 
