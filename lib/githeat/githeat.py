@@ -201,9 +201,9 @@ class Githeat:
         # return months
         raise NotImplementedError
 
-    def print_graph(self):
+    def get_graph_matrix(self):
         """
-        Prints contribution graph
+        Compute and return contribution graph matrix
 
         """
         logger.debug("Printing graph")
@@ -259,6 +259,13 @@ class Githeat:
         #  so fill it if it's not
         matrix[-1].fill()
 
+        return matrix
+
+    def print_graph(self, matrix):
+        """
+        Prints graph matrix
+
+        """
         #  for each day of the week
         for i in range(7):
             #  for the week column in the matrix
@@ -315,7 +322,8 @@ class Githeat:
         if self.gtype == 'inline':
             self.print_inline()
         else:
-            self.print_graph()
+            matrix = self.get_graph_matrix()
+            self.print_graph(matrix)
 
         if self.stat:
             print()
