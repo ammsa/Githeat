@@ -244,6 +244,13 @@ def redraw(term, screen, start=None, end=None):
                 echo(screen[row, col])
 
 
+def print_graph_legend(starting_x, y, colors, term):
+    for color in colors:
+        c = Cursor(y, starting_x, term)
+        echo_yx(c, colorize("  ", ansi=color, ansi_bg=color))
+        starting_x += 4
+
+
 def within_boundary(boundary_right_most_x, boundary_top_most_y,
                     boundary_left_most_x, boundary_bottom_most_y,
                     cursor):
@@ -369,7 +376,7 @@ def main(argv=None):
     }.get(inp_code, csr)
 
     #  get repo
-    g = Git("/Users/mustafa/Repos/tensorflow")
+    g = Git("/Users/mustafa/Repos/react")
     githeat = Githeat(g, **vars(args))
     githeat.parse_commits()
     githeat.compute_daily_contribution_map()
@@ -436,9 +443,15 @@ def main(argv=None):
             y += 1
         graph_bottom_most_y = y - 1
 
+        # print legend
+        x = (term.width - len(githeat.colors) * 4) // 2
+        y = graph_bottom_most_y + 5
+        print_graph_legend(x, y, githeat.colors, term)
+
+
         while True:
-            c = colorize("  ", ansi=15, ansi_bg=15)
-            echo_yx(csr, c)
+            cursor_color = colorize("  ", ansi=15, ansi_bg=15)
+            echo_yx(csr, cursor_color)
             inp = term.inkey()
 
             if inp == chr(3):
@@ -498,11 +511,14 @@ def main(argv=None):
                     else:
                         horizontal_empty = True
                         break
+
                     n_csr = Cursor(y, x, term)
                     next_value = screen_dates.get((n_csr.y, n_csr.x))
-                    echo_yx(home(bottom(csr)),
-                    term.ljust(term.bold_white(unicode(next_value))))
-                    echo_yx(right_of(home(bottom(csr)), len(unicode(next_value))), u'')
+                    if next_value:
+                        echo_yx(home(bottom(csr)),
+                        term.ljust(term.bold_white(unicode(next_value))))
+                        echo_yx(right_of(home(bottom(csr)), len(unicode(next_value))),
+                                u'')
 
                 if horizontal_empty or not next_value:
                     continue

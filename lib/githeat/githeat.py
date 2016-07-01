@@ -83,7 +83,7 @@ class Githeat:
         self.gtype = gtype
         self.width = BLOCK_REG
         self.days = days
-        self.color = COLORS_GRASS
+        self.colors = COLORS_GRASS
 
         self.stat = stat
         self.stat_number = stat_number
@@ -105,9 +105,9 @@ class Githeat:
 
         if color:
             if color == 'sky':
-                self.color = COLORS_SKY
+                self.colors = COLORS_SKY
             elif color == 'fire':
-                self.color = COLORS_FIRE
+                self.colors = COLORS_FIRE
 
         logger.start(logging_level)
         logger.debug("initialing githeat instance")
@@ -224,7 +224,7 @@ class Githeat:
         for current_day in sorted_normalized_daily_contribution:
             last_week_col = matrix[-1]
             day_contribution_color_index = int(self.daily_contribution_map[current_day])
-            color = self.color[day_contribution_color_index]
+            color = self.colors[day_contribution_color_index]
 
             try:
                 last_week_col.append([current_day, colorize(self.width,
@@ -289,7 +289,7 @@ class Githeat:
         sorted_normalized_daily_contribution = sorted(self.daily_contribution_map)
         for current_day in sorted_normalized_daily_contribution:
             norm_day_contribution = int(self.daily_contribution_map[current_day])
-            color = self.color[norm_day_contribution]
+            color = self.colors[norm_day_contribution]
             print(colorize(self.width, ansi=0, ansi_bg=color),
                   end=" {}{}".format(current_day.strftime("%b %d, %Y"), '\n')
                   )
