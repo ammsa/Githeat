@@ -318,6 +318,11 @@ def main(argv=None):
                x=csr.x,
                term=csr.term))
 
+    top = lambda csr: (
+        Cursor(y=0,
+               x=csr.x,
+               term=csr.term))
+
     center = lambda csr: Cursor(
             csr.term.height // 2,
             csr.term.width // 2,
@@ -385,6 +390,15 @@ def main(argv=None):
          term.keypad():
 
         # inp = None
+
+        # Print header
+        echo_yx(home(top(csr)),
+                term.ljust(term.bold_white(unicode(os.getcwd()))))
+
+        echo_yx(top(center(csr)),
+                term.ljust(term.bold_white(u'GitHeat {}'.format(__version__))))
+        echo_yx(right_of(top(center(csr)), len(u'GitHeat')), u'')
+
 
         graph_right_most_x = term.width  # initialized at terminal width
         graph_left_most_x = csr.x
@@ -464,15 +478,15 @@ def main(argv=None):
                         term.ljust(term.bold_white(unicode(next_value))))
                 echo_yx(right_of(home(bottom(csr)), len(unicode(next_value))), u'')
             else:
-                echo_yx(home(bottom(csr)), term.clear_eol)
-                redraw(term=term, screen=screen,
-                       start=home(bottom(csr)),
-                       end=end(bottom(csr)))
+                # echo_yx(home(bottom(csr)), term.clear_eol)
+                # redraw(term=term, screen=screen,
+                #        start=home(bottom(csr)),
+                #        end=end(bottom(csr)))
 
                 horizontal_empty = False
-                while not next_value and within_boundary(graph_right_most_x,
+                while not next_value and within_boundary(graph_right_most_x - 1,
                                                          graph_top_most_y,
-                                                         graph_left_most_x,
+                                                         graph_left_most_x + 1,
                                                          graph_bottom_most_y,
                                                          n_csr):
                     x = n_csr.x
@@ -486,7 +500,11 @@ def main(argv=None):
                         break
                     n_csr = Cursor(y, x, term)
                     next_value = screen_dates.get((n_csr.y, n_csr.x))
-                if horizontal_empty:
+                    echo_yx(home(bottom(csr)),
+                    term.ljust(term.bold_white(unicode(next_value))))
+                    echo_yx(right_of(home(bottom(csr)), len(unicode(next_value))), u'')
+
+                if horizontal_empty or not next_value:
                     continue
 
             if n_csr != csr:
