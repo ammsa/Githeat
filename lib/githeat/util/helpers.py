@@ -9,6 +9,8 @@ import math
 import datetime
 from operator import itemgetter
 
+import unicodedata
+
 
 def normalize_dict(dictionary, x, y):
     """
@@ -110,3 +112,14 @@ def get_months_with_last_same_as_first(start_date, months, include_year=False):
         months = [months[-1]] + months
 
     return months
+
+
+def remove_accents(input_str):
+    """
+    Removes accents from input string
+    :param input_str:
+    :return:
+    """
+    nfkd_form = unicodedata.normalize('NFKD', input_str)
+    only_ascii = nfkd_form.encode('ASCII', 'ignore')
+    return only_ascii

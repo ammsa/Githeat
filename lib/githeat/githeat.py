@@ -11,7 +11,6 @@ from xtermcolor import colorize
 from .core import logger
 from .util import helpers
 
-
 days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 COLORS_GRASS = [0, 22, 28, 34, 40, 46]
@@ -31,6 +30,12 @@ class Commit:
     def __cmp__(self, other):
         if hasattr(other, 'date'):
             return self.date.__cmp__(other.date)
+
+    def __str__(self):
+        return "{} on {}".format(self.author, self.date)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class Githeat:
@@ -119,21 +124,24 @@ class Githeat:
         logger.debug("parsing git log")
 
         git_log_args = ["--since=1 year 7 days",
-                        "--pretty=format:'%ci ~ %an'"]
+                        "--pretty=format:'%ci ~ %an'",
+                        "--date=local"]
         if self.author:
             git_log_args.append('--author={}'.format(self.author))
 
         last_year_log_dates = self.git_repo.log(git_log_args)
 
-        raw_commits = last_year_log_dates.replace("'", '').encode('utf-8').split("\n")
+        raw_commits = last_year_log_dates.replace("'", '').split("\n")
         self.commits_db = {}  # holds commits by date as key
 
-        if raw_commits and raw_commits[0]:
+        if raw_commits and raw_commits[0]:  # check if there exists any contribution
             for rc in raw_commits:
-                exact_date_and_time, author = rc.split(" ~ ")
-                author = author.decode('ascii', 'ignore')
+
+                exact_date_and_time, author = helpers.remove_accents(rc).split(" ~ ")
+                # author = author.decode('ascii', 'ignore')
                 exact_date_and_time = parse_date(exact_date_and_time)
 
+                #  if user specified what days to show, skip if not included
                 if self.days and exact_date_and_time.strftime("%A") not in self.days:
                     continue
 
