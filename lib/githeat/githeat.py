@@ -93,7 +93,8 @@ class Githeat:
         self.gtype = gtype
         self.width = BLOCK_REG
         self.days = days
-        self.colors = COLORS_GRASS
+        self.colors_iterator = cycle(COLORS)
+        self.colors = self.switch_to_next_color()
 
         self.stat = stat
         self.stat_number = stat_number
@@ -113,15 +114,11 @@ class Githeat:
             elif width == 'thin':
                 self.width = BLOCK_THIN
 
-        self.colors_iterator = cycle(COLORS)
-
         if color:
             if color == 'sky':
                 self.colors = COLORS_SKY
             elif color == 'fire':
                 self.colors = COLORS_FIRE
-        else:
-            self.switch_to_next_color()
 
         logger.start(logging_level)
         logger.debug("initialing githeat instance")
@@ -131,6 +128,7 @@ class Githeat:
         Updates colors to next color in `COLORS` list
         """
         self.colors = self.colors_iterator.next()
+        return self.colors
 
     def parse_commits(self):
         """
