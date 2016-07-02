@@ -704,9 +704,10 @@ def main(argv=None):
                                     continue
                                 range_from -= 1
                             elif inp2.code == commits_desc_terminal.KEY_DOWN:
-                                if range_from == len(commit_values_holder) - 1:
+                                if len(commit_values_holder[range_from:]) < commits_desc_terminal.height:
                                     continue
                                 range_from += 1
+
                             redraw(term=commits_desc_terminal, screen=screen2)
                             for value in commit_values_holder[range_from:]:
                                 if starting_y > commits_desc_terminal.height:
