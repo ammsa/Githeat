@@ -96,6 +96,9 @@ def _cmdline(argv=None):
     parser.add_argument('--author', '-a',
                         help='Filter heatmap by author. You can also write regex here')
 
+    parser.add_argument('--grep', '-g',
+                        help='Filter by keywords in commits')
+
     parser.add_argument("-c", "--config",
                         action="append",
                         help="config file [etc/config.yml]")
@@ -383,7 +386,8 @@ def main(argv=None):
     }.get(inp_code, csr)
 
     #  get repo
-    g = Git("/Users/mustafa/Repos/react")
+    # g = Git("/Users/mustafa/Repos/react")
+    g = Git(os.getcwd())
     githeat = Githeat(g, **vars(args))
     githeat.parse_commits()
     githeat.compute_daily_contribution_map()
@@ -639,6 +643,8 @@ def main(argv=None):
                             for commit in commits_on_date:
                                 value = [
                                     colorize(commit.abbr_commit_hash, ansi=3),
+                                    str(commit.date),
+                                    "\t",
                                     commits_desc_terminal.bold(
                                             colorize(commit.subject, ansi=15)
                                     ),

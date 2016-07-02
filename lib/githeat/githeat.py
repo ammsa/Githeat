@@ -82,7 +82,7 @@ class Githeat:
     def __init__(self, git_repo,
                  gtype='block', width='reg', days=None, color='grass',
                  stat=False, stat_number=5, separate=True, month_merge=False,
-                 author=None, config=None, logging_level="CRITICAL"
+                 author=None, grep=None, config=None, logging_level="CRITICAL"
                  ):
 
         self.git_repo = git_repo
@@ -97,6 +97,7 @@ class Githeat:
         self.block_separation_show = ' ' if separate else ''
         self.month_merge = month_merge
         self.author = author
+        self.grep = grep
 
         self.config = config
 
@@ -130,6 +131,8 @@ class Githeat:
                         "--date=local"]
         if self.author:
             git_log_args.append('--author={}'.format(self.author))
+        if self.grep:
+            git_log_args.append("--grep={}".format(self.grep))
 
         last_year_log_dates = self.git_repo.log(git_log_args)
 

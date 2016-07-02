@@ -106,6 +106,9 @@ def _cmdline(argv=None):
     parser.add_argument('--author', '-a',
                         help='Filter heatmap by author. You can also write regex here')
 
+    parser.add_argument('--grep', '-g',
+                        help='Filter by keywords in commits')
+
     parser.add_argument("-c", "--config",
                         action="append",
                         help="config file [etc/config.yml]")
