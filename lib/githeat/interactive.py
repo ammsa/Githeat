@@ -373,8 +373,8 @@ def main(argv=None):
         csr.term.KEY_KP_9: above(right_of(csr, 1), 1),
 
         # shift + arrows
-        csr.term.KEY_SLEFT: left_of(csr, 6),
-        csr.term.KEY_SRIGHT: right_of(csr, 6),
+        csr.term.KEY_SLEFT: left_of(csr, 9),
+        csr.term.KEY_SRIGHT: right_of(csr, 9),
         csr.term.KEY_SDOWN: below(csr, 4),
         csr.term.KEY_SUP: above(csr, 4),
 
@@ -529,7 +529,7 @@ def main(argv=None):
                 )
                 info = top_authors_to_string(top_5, colors=githeat.colors)
                 if info:
-                    info = term.bold_white("Top commiters: ") + info
+                    info = term.bold_white("Most commiters: ") + info
                 else:
                     info = "No commits"
 
