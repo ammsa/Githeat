@@ -529,11 +529,11 @@ def main(argv=None):
                 )
                 info = top_authors_to_string(top_5, colors=githeat.colors)
                 if info:
-                    info = term.bold_white("Most commiters: ") + info
+                    info = term.bold_white("Most committers: ") + info
                 else:
                     info = "No commits"
 
-                footer = term.bold_white(unicode(new_cursor_date_value)) + ' ' + info
+                footer = " ".join([term.bold_white(unicode(new_cursor_date_value)), info])
                 value = term.ljust(footer)
                 location = home(bottom(csr))
                 echo_yx(location, value)
@@ -574,11 +574,11 @@ def main(argv=None):
                         )
                         info = top_authors_to_string(top_5, colors=githeat.colors)
                         if info:
-                            info = term.bold_white("Top commiters: ") + info
+                            info = term.bold_white("Most committers: ") + info
                         else:
                             info = "No commits"
-                        footer = term.bold_white(unicode(new_cursor_date_value)) + \
-                                 ' ' + info
+                        footer = " ".join([term.bold_white(unicode(new_cursor_date_value))
+                                          , info])
                         value = term.ljust(footer)
                         location = home(bottom(csr))
                         echo_yx(location, value)
