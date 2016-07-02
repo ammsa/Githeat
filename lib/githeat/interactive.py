@@ -312,6 +312,31 @@ def within_boundary(boundary_right_most_x, boundary_top_most_y,
     return True
 
 
+
+def print_graph(term, screen, screen_dates, x, y, graph_left_most_x, matrix, githeat):
+    #  for each day of the week
+    for i in range(7):
+        #  for the week column in the matrix
+        for week in matrix:
+
+            if githeat.month_merge:
+                #  check if value in that week is just empty spaces and not colorize
+                if week.col[i][1] == githeat.width:
+                    continue
+
+            c = Cursor(y, x, term)
+            value = week.col[i][1]
+            screen[(c.y, c.x)] = value
+            screen_dates[(c.y, c.x)] = week.col[i][0]
+
+            echo_yx(c, value)
+
+            x += len(githeat.width)
+
+        #  reset x
+        x = graph_left_most_x
+        y += 1
+
 def open_commits_terminal(new_cursor_date_value, commits_on_date):
     """
     Creates a new terminal window for showing commits info
@@ -565,6 +590,7 @@ def main(argv=None):
         echo_yx(location, value)
         screen[location.y, location.x] = term.ljust(footer)
 
+
         graph_right_most_x = term.width  # initialized at terminal width
         graph_left_most_x = csr.x
         graph_bottom_most_y = term.height  # initialized at terminal height
@@ -573,38 +599,32 @@ def main(argv=None):
         x = csr.x
         y = csr.y
 
-        #  for each day of the week
+        #  get graph boundaries
         for i in range(7):
             #  for the week column in the matrix
             for week in matrix:
-
                 if githeat.month_merge:
                     #  check if value in that week is just empty spaces and not colorize
                     if week.col[i][1] == githeat.width:
                         continue
-
-                c = Cursor(y, x, term)
-                value = week.col[i][1]
-                screen[(c.y, c.x)] = value
-                screen_dates[(c.y, c.x)] = week.col[i][0]
-
-                echo_yx(c, value)
-
                 x += len(githeat.width)
 
             graph_right_most_x = x
-            #  reset x
-            x = graph_left_most_x
+            x = graph_left_most_x  # reset x
             y += 1
         graph_bottom_most_y = y - 1
 
+        #  print graph
+        print_graph(term, screen, screen_dates, csr.x, csr.y,
+                    graph_left_most_x, matrix, githeat)
+
         # print legend
-        block_seperation_width = 4
-        x = (term.width - len(githeat.colors) * block_seperation_width) // 2
+        block_separation_width = 4
+        x = (term.width - len(githeat.colors) * block_separation_width) // 2
         y = graph_bottom_most_y + 5
         print_graph_legend(x, y,
                            githeat.width,
-                           block_seperation_width,
+                           block_separation_width,
                            githeat.colors,
                            screen,
                            term)
@@ -697,6 +717,7 @@ def main(argv=None):
                         msg = msg if names else "No commits"
                         footer = " ".join([term.bold_white(unicode(new_cursor_date_value))
                                           , msg])
+
                         value = term.ljust(footer)
                         location = home(bottom(csr))
                         echo_yx(location, value)
