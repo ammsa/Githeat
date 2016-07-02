@@ -244,8 +244,8 @@ def clear(term, start, end):
     :param end:
     :return:
     """
-    if within_boundary(0, 0, term.width, term.width, start) or \
-        within_boundary(0, 0, term.width, term.width, end) or \
+    if is_within_boundary(0, 0, term.width, term.width, start) or \
+        is_within_boundary(0, 0, term.width, term.width, end) or \
         start.x > end.x or start.y > end.y:
         raise ValueError("NOT VALID ")
         return
@@ -263,6 +263,7 @@ def clear(term, start, end):
 
 def top_authors_to_string(top_authors, colors=None):
     authors_colorized = []
+    authors_non_colorized = []
     if top_authors:
         for tup in top_authors:
             if colors:
@@ -271,9 +272,10 @@ def top_authors_to_string(top_authors, colors=None):
             else:
                 author_string = tup[0]
             authors_colorized.append(author_string)
+            authors_non_colorized.append(tup[0])
 
     top_n_authors = ", ".join(authors_colorized)
-    return top_n_authors
+    return top_n_authors, len(", ".join(authors_non_colorized))
 
 
 def print_graph_legend(starting_x, y, width, block_seperation_width, colors, screen,
@@ -286,7 +288,7 @@ def print_graph_legend(starting_x, y, width, block_seperation_width, colors, scr
         starting_x += block_seperation_width
 
 
-def within_boundary(boundary_right_most_x, boundary_top_most_y,
+def is_within_boundary(boundary_right_most_x, boundary_top_most_y,
                     boundary_left_most_x, boundary_bottom_most_y,
                     cursor):
     """
@@ -310,7 +312,6 @@ def within_boundary(boundary_right_most_x, boundary_top_most_y,
         return False
 
     return True
-
 
 
 def print_graph(term, screen, screen_dates, x, y, graph_left_most_x, matrix, githeat):
@@ -430,6 +431,33 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
                 location = Cursor(starting_y, x, term)
                 echo_yx(location, value)
                 starting_y += 1
+
+
+def update_most_committers_footer(location, githeat, date, term, screen):
+    """
+    Updates footer with most commiters info
+
+    :param location:
+    :param githeat:
+    :param date:
+    :param term:
+    :param screen:
+    :return:
+    """
+    top_n = githeat.get_top_n_commiters(
+            githeat.commits_db.get(date),
+            normailze_values=True,
+            n=5
+    )
+
+    names, _ = top_authors_to_string(top_n, colors=githeat.colors)
+    msg = "{} {}".format(term.bold_white("Most committers:"), names)
+    msg = msg if names else "No commits"
+
+    footer = " ".join([term.bold_white(unicode(date)), msg])
+    value = term.ljust(footer)
+    echo_yx(location, value)
+    screen[location.y, location.x] = value
 
 
 def main(argv=None):
@@ -590,14 +618,12 @@ def main(argv=None):
         echo_yx(location, value)
         screen[location.y, location.x] = term.ljust(footer)
 
-
         graph_right_most_x = term.width  # initialized at terminal width
         graph_left_most_x = csr.x
         graph_bottom_most_y = term.height  # initialized at terminal height
         graph_top_most_y = csr.y
 
-        x = csr.x
-        y = csr.y
+        graph_x, graph_y = csr.x, csr.y
 
         #  get graph boundaries
         for i in range(7):
@@ -607,22 +633,23 @@ def main(argv=None):
                     #  check if value in that week is just empty spaces and not colorize
                     if week.col[i][1] == githeat.width:
                         continue
-                x += len(githeat.width)
+                graph_x += len(githeat.width)
 
-            graph_right_most_x = x
-            x = graph_left_most_x  # reset x
-            y += 1
-        graph_bottom_most_y = y - 1
+            graph_right_most_x = graph_x
+            graph_x = graph_left_most_x  # reset x
+            graph_y += 1
+        graph_bottom_most_y = graph_y - 1
 
+        graph_x, graph_y = csr.x, csr.y
         #  print graph
-        print_graph(term, screen, screen_dates, csr.x, csr.y,
+        print_graph(term, screen, screen_dates, graph_x, graph_y,
                     graph_left_most_x, matrix, githeat)
 
         # print legend
         block_separation_width = 4
-        x = (term.width - len(githeat.colors) * block_separation_width) // 2
-        y = graph_bottom_most_y + 5
-        print_graph_legend(x, y,
+        legend_x = (term.width - len(githeat.colors) * block_separation_width) // 2
+        legend_y = graph_bottom_most_y + 5
+        print_graph_legend(legend_x, legend_y,
                            githeat.width,
                            block_separation_width,
                            githeat.colors,
@@ -637,7 +664,30 @@ def main(argv=None):
             if inp in [chr(3), chr(81), chr(113)]:
                 # ^c or q or Q to exits
                 break
+            elif inp == chr(99):
+                # c pressed
+                githeat.switch_to_next_color()
+                #  changing colors requies regenerating matrix,
+                #  because values there are colorized strings, harder to change
+                matrix = githeat.get_graph_matrix()
+                #  print changed color graph
+                print_graph(term, screen, screen_dates, graph_x, graph_y,
+                            graph_left_most_x, matrix, githeat)
+                #  print changed color legend
+                print_graph_legend(legend_x, legend_y,
+                           githeat.width,
+                           block_separation_width,
+                           githeat.colors,
+                           screen,
+                           term)
 
+                #  print changed color footer
+                new_cursor_date_value = screen_dates.get((csr.y, csr.x))
+                if new_cursor_date_value:  # only if it needs changing
+                    location = home(bottom(csr))
+                    update_most_committers_footer(location, githeat,
+                                                  new_cursor_date_value, term, screen)
+                continue
             # elif inp == chr(19):
             #     # ^s saves
             #     echo_yx(home(bottom(csr)),
@@ -656,37 +706,24 @@ def main(argv=None):
             else:
                 n_csr = lookup_move(inp.code, csr, term)
 
-            # check if cursor new move is within our graph boundaries
-            if not within_boundary(graph_right_most_x, graph_top_most_y,
+            # only allow moves within the graph boundaries
+            if not is_within_boundary(graph_right_most_x, graph_top_most_y,
                                    graph_left_most_x, graph_bottom_most_y,
                                    n_csr):
                 continue
 
             # get value at new cursor block, if it exists
             new_cursor_date_value = screen_dates.get((n_csr.y, n_csr.x))
-            if new_cursor_date_value:  # Cursor is on a date block with commits
-                top_5 = githeat.get_top_n_commiters(
-                        githeat.commits_db.get(new_cursor_date_value),
-                        normailze_values=True,
-                        n=5
-                )
-
-                names = top_authors_to_string(top_5, colors=githeat.colors)
-                msg = "{} {}".format(term.bold_white("Most committers:"), names)
-                msg = msg if names else "No commits"
-
-                footer = " ".join([term.bold_white(unicode(new_cursor_date_value)), msg])
-                value = term.ljust(footer)
+            if new_cursor_date_value:  # Cursor is on a date block with non-empty commits
                 location = home(bottom(csr))
-                echo_yx(location, value)
-                screen[location.y, location.x] = value
-
+                update_most_committers_footer(location, githeat,
+                                             new_cursor_date_value, term, screen)
             else:
 
                 horizontal_empty = False
 
                 #  jump through empty values
-                while not new_cursor_date_value and within_boundary(
+                while not new_cursor_date_value and is_within_boundary(
                         graph_right_most_x - 1,
                         graph_top_most_y,
                         graph_left_most_x + 1,
@@ -706,21 +743,9 @@ def main(argv=None):
                     n_csr = Cursor(y, x, term)
                     new_cursor_date_value = screen_dates.get((n_csr.y, n_csr.x))
                     if new_cursor_date_value:
-                        top_5 = githeat.get_top_n_commiters(
-                                githeat.commits_db.get(new_cursor_date_value),
-                                normailze_values=True,
-                                n=5
-                        )
-                        names = top_authors_to_string(top_5, colors=githeat.colors)
-
-                        msg = "{} {}".format(term.bold_white("Most committers:"), names)
-                        msg = msg if names else "No commits"
-                        footer = " ".join([term.bold_white(unicode(new_cursor_date_value))
-                                          , msg])
-
-                        value = term.ljust(footer)
                         location = home(bottom(csr))
-                        echo_yx(location, value)
+                        update_most_committers_footer(location, githeat,
+                                                      new_cursor_date_value, term, screen)
 
                 if horizontal_empty or not new_cursor_date_value:
                     continue
@@ -741,7 +766,7 @@ def main(argv=None):
                 #     csr = n_csr
 
             if inp == chr(13):
-                # Enter pressed on date block
+                # ENTER pressed on date block
                 commits_on_date = githeat.commits_db.get(new_cursor_date_value)
 
                 if commits_on_date:  # if block has contributions

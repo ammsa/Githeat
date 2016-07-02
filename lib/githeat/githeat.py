@@ -7,7 +7,9 @@ from collections import Counter, defaultdict
 
 from dateutil.parser import parse as parse_date
 from dateutil.relativedelta import relativedelta
+from itertools import cycle
 from xtermcolor import colorize
+
 from .core import logger
 from .util import helpers
 
@@ -16,6 +18,7 @@ days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satur
 COLORS_GRASS = [0, 22, 28, 34, 40, 46]
 COLORS_SKY = [0, 24, 31, 38, 45, 51]
 COLORS_FIRE = [232, 220, 214, 208, 202, 196]
+COLORS = [COLORS_GRASS, COLORS_FIRE, COLORS_SKY]
 
 BLOCK_THICK = '   '
 BLOCK_REG = '  '
@@ -110,14 +113,24 @@ class Githeat:
             elif width == 'thin':
                 self.width = BLOCK_THIN
 
+        self.colors_iterator = cycle(COLORS)
+
         if color:
             if color == 'sky':
                 self.colors = COLORS_SKY
             elif color == 'fire':
                 self.colors = COLORS_FIRE
+        else:
+            self.switch_to_next_color()
 
         logger.start(logging_level)
         logger.debug("initialing githeat instance")
+
+    def switch_to_next_color(self):
+        """
+        Updates colors to next color in `COLORS` list
+        """
+        self.colors = self.colors_iterator.next()
 
     def parse_commits(self):
         """
