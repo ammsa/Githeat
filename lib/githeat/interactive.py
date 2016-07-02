@@ -248,7 +248,8 @@ def top_authors_to_string(top_authors, colors=None):
     return top_n_authors
 
 
-def print_graph_legend(starting_x, y, width,block_seperation_width, colors, screen, term):
+def print_graph_legend(starting_x, y, width, block_seperation_width, colors, screen,
+                       term):
     for color in colors:
         c = Cursor(y, starting_x, term)
         value = colorize(width, ansi=color, ansi_bg=color)
@@ -493,7 +494,6 @@ def main(argv=None):
                 # ^c or q or Q to exits
                 break
 
-
             # elif inp == chr(19):
             #     # ^s saves
             #     echo_yx(home(bottom(csr)),
@@ -550,10 +550,10 @@ def main(argv=None):
                 #  jump through empty values
                 while not new_cursor_date_value and within_boundary(
                                 graph_right_most_x - 1,
-                                graph_top_most_y,
+                        graph_top_most_y,
                                 graph_left_most_x + 1,
-                                graph_bottom_most_y,
-                                n_csr):
+                        graph_bottom_most_y,
+                        n_csr):
                     x = n_csr.x
                     y = n_csr.y
                     if n_csr.x > csr.x:
@@ -568,9 +568,9 @@ def main(argv=None):
                     new_cursor_date_value = screen_dates.get((n_csr.y, n_csr.x))
                     if new_cursor_date_value:
                         top_5 = githeat.get_top_n_commiters(
-                            githeat.commits_db.get(new_cursor_date_value),
-                            normailze_values=True,
-                            n=5
+                                githeat.commits_db.get(new_cursor_date_value),
+                                normailze_values=True,
+                                n=5
                         )
                         info = top_authors_to_string(top_5, colors=githeat.colors)
                         if info:
@@ -603,14 +603,57 @@ def main(argv=None):
 
             if inp == chr(13):
                 # Enter pressed on non empty date block
-                if githeat.commits_db.get(new_cursor_date_value):
+                commits_on_date = githeat.commits_db.get(new_cursor_date_value)
+                if commits_on_date:
 
                     commits_desc_terminal = Terminal()
                     with commits_desc_terminal.keypad():
                         redraw(term=commits_desc_terminal, screen={})
+
+                        # Print header left
+                        header_left = str(new_cursor_date_value)
+                        location = Cursor(0, 0, commits_desc_terminal)
+                        value = commits_desc_terminal.bold(header_left)
+                        echo_yx(location, value)
+
+                        # Print header center
+                        header_center = u'GitHeat {}'.format(__version__)
+                        location = Cursor(0, (commits_desc_terminal.width // 2) - len(
+                            header_center) // 2, commits_desc_terminal)
+                        value = term.bold(header_center)
+                        echo_yx(location, value)
+
+                        # Print header right
+                        header_right = u'q to return'
+                        location = Cursor(0,
+                                          commits_desc_terminal.width - len(header_right),
+                                          commits_desc_terminal)
+                        value = commits_desc_terminal.ljust(commits_desc_terminal.bold(
+                                header_right))
+                        echo_yx(location, value)
+
+                        starting_y = 2
+                        x = 0
+
                         while True:
-                            # cursor_color = colorize(githeat.width, ansi=15, ansi_bg=15)
-                            echo_yx(Cursor(0,0, commits_desc_terminal), str(new_cursor_date_value))
+                            for commit in commits_on_date:
+                                value = [
+                                    colorize(commit.abbr_commit_hash, ansi=3),
+                                    commits_desc_terminal.bold(
+                                            colorize(commit.subject, ansi=15)
+                                    ),
+                                    colorize(commit.author, ansi=6),
+                                    colorize("<{}>".format(commit.author_email),
+                                             ansi=14)
+                                ]
+
+                                value = " ".join(value)
+                                location = Cursor(starting_y, x, commits_desc_terminal)
+                                echo_yx(location, value)
+                                starting_y += 1
+
+                            starting_y = 2
+                            x = 0
 
                             sinp = commits_desc_terminal.inkey()
 
@@ -619,6 +662,8 @@ def main(argv=None):
 
                         if sinp == chr(3):
                             break
+                        else:
+                            redraw(term=commits_desc_terminal, screen={})
                     redraw(term=term, screen=screen)
                 else:
                     info = u'Please choose a date with contributions'
@@ -627,10 +672,6 @@ def main(argv=None):
                     location = home(bottom(csr))
                     echo_yx(location, value)
                     screen[location.y, location.x] = value
-
-
-
-
 
     return 0
 

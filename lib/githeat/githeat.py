@@ -23,9 +23,12 @@ BLOCK_THIN = ' '
 
 
 class Commit:
-    def __init__(self, date, author):
+    def __init__(self, abbr_commit_hash, date, author, author_email, subject):
+        self.abbr_commit_hash = abbr_commit_hash
         self.date = date
         self.author = author
+        self.author_email = author_email
+        self.subject = subject
 
     def __cmp__(self, other):
         if hasattr(other, 'date'):
@@ -39,7 +42,6 @@ class Commit:
 
 
 class Githeat:
-
     class _Column:
 
         def __init__(self, width, full_empty_col=False):
@@ -122,9 +124,9 @@ class Githeat:
 
         """
         logger.debug("parsing git log")
-
+        delimiter = '<githeat_delimeter>'
         git_log_args = ["--since=1 year 7 days",
-                        "--pretty=format:'%ci ~ %an'",
+                        "--pretty=format:'%h{0}%ci{0}%an{0}%ae{0}%s'".format(delimiter),
                         "--date=local"]
         if self.author:
             git_log_args.append('--author={}'.format(self.author))
@@ -136,8 +138,8 @@ class Githeat:
 
         if raw_commits and raw_commits[0]:  # check if there exists any contribution
             for rc in raw_commits:
-
-                exact_date_and_time, author = helpers.remove_accents(rc).split(" ~ ")
+                [abbr_commit_hash, exact_date_and_time, author, author_email, subject]\
+                    = helpers.remove_accents(rc).split(delimiter)
                 # author = author.decode('ascii', 'ignore')
                 exact_date_and_time = parse_date(exact_date_and_time)
 
@@ -145,7 +147,11 @@ class Githeat:
                 if self.days and exact_date_and_time.strftime("%A") not in self.days:
                     continue
 
-                commit = Commit(exact_date_and_time, author)
+                commit = Commit(abbr_commit_hash,
+                                exact_date_and_time,
+                                author,
+                                author_email,
+                                subject)
                 if exact_date_and_time.date() in self.commits_db:
                     self.commits_db[exact_date_and_time.date()].append(commit)
                 else:
@@ -265,7 +271,7 @@ class Githeat:
                 next_day_num = days.index(next_day.strftime("%A"))
                 last_week_col.fill_by(next_day_num)
 
-        #  make sure that the most current week (last col of matrix) col is of size 7,
+        # make sure that the most current week (last col of matrix) col is of size 7,
         #  so fill it if it's not
         matrix[-1].fill()
 
@@ -304,7 +310,7 @@ class Githeat:
                   end=" {}{}".format(current_day.strftime("%b %d, %Y"), '\n')
                   )
 
-    def get_top_n_commiters(self, commits_list, n = 5, normailze_values=False):
+    def get_top_n_commiters(self, commits_list, n=5, normailze_values=False):
         """
         Returns a list of names of the top n commiters from a list of commits
         """
@@ -333,7 +339,7 @@ class Githeat:
         if top_n:
             print("Top {} committers:".format(n))
             for idx, info in enumerate(top_n):
-                print("{}. {}: {}".format(idx+1, info[0], info[1]))
+                print("{}. {}: {}".format(idx + 1, info[0], info[1]))
 
     def run(self):
         """
