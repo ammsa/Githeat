@@ -236,6 +236,31 @@ def redraw(term, screen, start=None, end=None):
                 echo(screen[row, col])
 
 
+def clear(term, start, end):
+    """
+    Empty part of terminal, starting from start (top left) to end (bottom right)
+    :param term:
+    :param start:
+    :param end:
+    :return:
+    """
+    if within_boundary(0, 0, term.width, term.width, start) or \
+        within_boundary(0, 0, term.width, term.width, end) or \
+        start.x > end.x or start.y > end.y:
+        raise ValueError("NOT VALID ")
+        return
+
+    x = start.x
+    y = start.y
+    for j in range(abs(end.y - start.y)):
+        for i in range(abs(end.x - start.x)):
+            csr = Cursor(y, x, term)
+            echo_yx(csr, " ")
+            x += 1
+        x = start.x
+        y += 1
+
+
 def top_authors_to_string(top_authors, colors=None):
     authors_colorized = []
     if top_authors:
@@ -386,8 +411,8 @@ def main(argv=None):
     }.get(inp_code, csr)
 
     #  get repo
-    # g = Git("/Users/mustafa/Repos/react")
-    g = Git(os.getcwd())
+    g = Git("/Users/mustafa/Repos/git")
+    # g = Git(os.getcwd())
     githeat = Githeat(g, **vars(args))
     githeat.parse_commits()
     githeat.compute_daily_contribution_map()
@@ -513,8 +538,8 @@ def main(argv=None):
             # elif inp == chr(12):
             #     # ^l refreshes
             #     redraw(term=term, screen=screen)
-
-            n_csr = lookup_move(inp.code, csr, term)
+            else:
+                n_csr = lookup_move(inp.code, csr, term)
 
             # check if cursor new move is within our graph boundaries
             if not within_boundary(graph_right_most_x, graph_top_most_y,
@@ -608,6 +633,7 @@ def main(argv=None):
             if inp == chr(13):
                 # Enter pressed on non empty date block
                 commits_on_date = githeat.commits_db.get(new_cursor_date_value)
+                screen2 = {}
                 if commits_on_date:
 
                     commits_desc_terminal = Terminal()
@@ -619,6 +645,7 @@ def main(argv=None):
                         location = Cursor(0, 0, commits_desc_terminal)
                         value = commits_desc_terminal.bold(header_left)
                         echo_yx(location, value)
+                        screen2[location.y, location.x] = value
 
                         # Print header center
                         header_center = u'GitHeat {}'.format(__version__)
@@ -626,6 +653,8 @@ def main(argv=None):
                             header_center) // 2, commits_desc_terminal)
                         value = term.bold(header_center)
                         echo_yx(location, value)
+                        screen2[location.y, location.x] = value
+
 
                         # Print header right
                         header_right = u'q to return'
@@ -635,41 +664,60 @@ def main(argv=None):
                         value = commits_desc_terminal.ljust(commits_desc_terminal.bold(
                                 header_right))
                         echo_yx(location, value)
+                        screen2[location.y, location.x] = value
+
+                        commit_values_holder = []
+                        for commit in commits_on_date:
+                            value = [
+                                colorize(commit.abbr_commit_hash, ansi=3),
+                                str(commit.date),
+                                "\t",
+                                commits_desc_terminal.bold(
+                                        colorize(commit.subject, ansi=15)
+                                ),
+                                colorize(commit.author, ansi=6),
+                                colorize("<{}>".format(commit.author_email),
+                                         ansi=14)
+                            ]
+
+                            value = " ".join(value)
+                            commit_values_holder.append(value)
 
                         starting_y = 2
                         x = 0
+                        range_from = 0
+                        range_to = commits_desc_terminal.height - starting_y
+                        for value in commit_values_holder[range_from:range_to]:
+                            location = Cursor(starting_y, x, commits_desc_terminal)
+                            echo_yx(location, value)
+                            starting_y += 1
 
                         while True:
-                            for commit in commits_on_date:
-                                value = [
-                                    colorize(commit.abbr_commit_hash, ansi=3),
-                                    str(commit.date),
-                                    "\t",
-                                    commits_desc_terminal.bold(
-                                            colorize(commit.subject, ansi=15)
-                                    ),
-                                    colorize(commit.author, ansi=6),
-                                    colorize("<{}>".format(commit.author_email),
-                                             ansi=14)
-                                ]
+                            inp2 = commits_desc_terminal.inkey()
 
-                                value = " ".join(value)
+                            if inp2 in [chr(3), chr(81), chr(113)]:
+                                break
+
+                            starting_y = 2
+                            if inp2.code == commits_desc_terminal.KEY_UP:
+                                if range_from == 0:
+                                    continue
+                                range_from -= 1
+                            elif inp2.code == commits_desc_terminal.KEY_DOWN:
+                                if range_from == len(commit_values_holder) - 1:
+                                    continue
+                                range_from += 1
+                            redraw(term=commits_desc_terminal, screen=screen2)
+                            for value in commit_values_holder[range_from:]:
+                                if starting_y > commits_desc_terminal.height:
+                                    break
                                 location = Cursor(starting_y, x, commits_desc_terminal)
                                 echo_yx(location, value)
                                 starting_y += 1
 
-                            starting_y = 2
-                            x = 0
-
-                            sinp = commits_desc_terminal.inkey()
-
-                            if sinp in [chr(3), chr(81), chr(113)]:
-                                break
-
-                        if sinp == chr(3):
+                        if inp2 == chr(3):
                             break
-                        else:
-                            redraw(term=commits_desc_terminal, screen={})
+
                     redraw(term=term, screen=screen)
                 else:
                     info = u'Please choose a date with contributions'
