@@ -27,6 +27,11 @@ __all__ = "main",
 DAY_REGEX = r"(?i)^(Sun|Mon|(T(ues|hurs))|Fri)(day|\.)" \
             r"?$|Wed(\.|nesday)?$|Sat(\.|urday)?$|T((ue?)|(hu?r?))\.?$"
 
+ONE_TO_SEVEN_KEYS = [chr(number) for number in range(49, 56)]  # 1 to 7
+Q_TO_QUOTES_KEYS = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p",
+                          "[", "]", "\\", "'"]
+QUIT_KEYS = [chr(27), chr(3)]  # esc, ^c keys
+
 
 def _cmdline(argv=None):
     """ Parse command line arguments.
@@ -118,7 +123,6 @@ def _cmdline(argv=None):
                         help="logger level")
 
     args = parser.parse_args(argv)
-    print(args)
     if args.days:
         args.days = _is_valid_days_list(args.days)
 
@@ -309,7 +313,7 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
         screen[location.y, location.x] = value
 
         # Print header right
-        header_right = u'^c or q to return'
+        header_right = u'ESC, to return'
         location = Cursor(0, term.width - len(header_right), term)
         value = term.ljust(term.bold(header_right))
         echo_yx(location, value)
@@ -345,9 +349,9 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
         while True:
             inp = term.inkey()
 
-            if inp in [chr(81), chr(113)]:
+            if inp in chr(27):  # ESC to return
                 break
-            elif inp == chr(3):
+            elif inp == chr(3):  # ^c to exit
                 sys.exit(0)
 
             # scrolling window on commits
@@ -502,13 +506,16 @@ def main(argv=None):
     }.get(inp_code, csr)
 
     #  get repo
-    g = Git("/Users/mustafa/Repos/git")
-    # g = Git(os.getcwd())
+    # g = Git("/Users/mustafa/Repos/git")
+    g = Git(os.getcwd())
     githeat = Githeat(g, **vars(args))
     githeat.parse_commits()
+    githeat.init_daily_contribution_map()
+    print(githeat.months)
+    print(len(githeat.months))
     githeat.compute_daily_contribution_map()
     githeat.normalize_daily_contribution_map()
-    matrix = githeat.get_graph_matrix()
+    matrix = githeat.compute_graph_matrix()
 
     term = Terminal()
     if githeat.month_merge:
@@ -548,7 +555,7 @@ def main(argv=None):
         screen[location.y, location.x] = value
 
         # Print header right
-        header_right = u'^c or q to exit'
+        header_right = u'ESC, ^c to exit'
         location = Cursor(0, term.width - len(header_right), term)
         value = term.ljust(term.bold(header_right))
         echo_yx(location, value)
@@ -603,15 +610,15 @@ def main(argv=None):
             echo_yx(csr, cursor_color)
             inp = term.inkey()
 
-            if inp in [chr(3), chr(81), chr(113)]:
-                # ^c or q or Q to exits
+            if inp in QUIT_KEYS:
+                # Esc or ^c pressed
                 break
             elif inp == chr(99):
                 # c pressed, thus change color
                 githeat.switch_to_next_color()
                 #  changing colors requires regenerating matrix,
                 #  because values there are colorized strings, harder to change
-                matrix = githeat.get_graph_matrix()
+                matrix = githeat.compute_graph_matrix()
                 #  print changed color graph
                 print_graph(term, screen, screen_dates, graph_x, graph_y,
                             graph_left_most_x, matrix, githeat)
@@ -630,14 +637,20 @@ def main(argv=None):
                     update_most_committers_footer(location, githeat,
                                                   new_cursor_date_value, term, screen)
                 continue
-            elif inp in [chr(number) for number in range(49, 49 + 7)]:
-                #  1 to 7 pressed.
-                githeat.toggle_day(int(inp))
-                #  computing new daily contributions with specific days allowed
+            elif inp in ONE_TO_SEVEN_KEYS or inp in Q_TO_QUOTES_KEYS:
+                if inp in ONE_TO_SEVEN_KEYS:
+                    #  key from 1 to 7 pressed.
+                    githeat.toggle_day(int(inp) - 1)
+                else:
+                    # key from q to ' pressed
+                    githeat.toggle_month(Q_TO_QUOTES_KEYS.index(inp))
+
+                #  computing new daily contributions with specific days/months allowed
+                githeat.reset_daily_contribution_map()
                 githeat.compute_daily_contribution_map()
                 githeat.normalize_daily_contribution_map()
-                matrix = githeat.get_graph_matrix()
-                #  print changed days graph
+                matrix = githeat.compute_graph_matrix()
+                #  print changed graph
                 print_graph(term, screen, screen_dates, graph_x, graph_y,
                             graph_left_most_x, matrix, githeat)
 
@@ -695,15 +708,6 @@ def main(argv=None):
                 prev_value = screen.get((csr.y, csr.x), u'  ')
                 echo_yx(csr, prev_value)
                 csr = n_csr
-
-                # elif input_filter(inp):
-                #     echo_yx(csr, inp)
-                #     screen[(csr.y, csr.x)] = inp.__str__()
-                #     n_csr = right_of(csr, 1)
-                #     if n_csr == csr:
-                #         # wrap around margin
-                #         n_csr = home(below(csr, 1))
-                #     csr = n_csr
 
             if inp == chr(13):
                 # ENTER pressed on date block

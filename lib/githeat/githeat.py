@@ -94,6 +94,9 @@ class Githeat:
         self.width = BLOCK_REG
         self.days = days
         self.days_toggle = [False] * 7
+        self.months = []
+        self.display_months = []
+        self.display_months_toggle = []
         self.colors_iterator = cycle(COLORS)
         self.colors = self.switch_to_next_color()
 
@@ -128,8 +131,19 @@ class Githeat:
         """
         Toggles a day to be shown and updates self.days
         """
-        self.days_toggle[day_num - 1] = not self.days_toggle[day_num - 1]  # toggle day
+        self.days_toggle[day_num] = not self.days_toggle[day_num]  # toggle day
         self.days = [d for idx, d in enumerate(DAYS) if self.days_toggle[idx]]
+
+    def toggle_month(self, num):
+        """
+        Toggles a month to be shown and updates self.month_to_be_shown
+        """
+
+        self.display_months_toggle[num] = not self.display_months_toggle[num]
+        self.display_months = []
+        for idx, m in enumerate(self.months):
+            if self.display_months_toggle[idx]:
+                self.display_months.append(m)
 
     def switch_to_next_color(self):
         """
@@ -182,11 +196,11 @@ class Githeat:
             print('No contribution found')
             sys.exit(0)
 
-    def compute_daily_contribution_map(self):
+    def init_daily_contribution_map(self):
         """
-        Compute how many commits were committed on each day
+        Initialize daily contribution maps with 0 contributions on each day
         """
-        logger.debug("Computing contributions")
+        logger.debug("init contributions")
 
         self.daily_contribution_map = defaultdict(float)
 
@@ -205,14 +219,42 @@ class Githeat:
                 else:
                     flag_skip_til_first_sunday = False
 
+            # update self.months with the months in the graph
+            year_month = datetime.date(current_day.year, current_day.month, 1)
+            if year_month not in self.months:
+                self.months.append(year_month)
+
             self.daily_contribution_map[current_day] = 0.0
+
+        self.display_months_toggle = [False] * len(self.months)
+
+    def reset_daily_contribution_map(self):
+        """
+        Resets daily contribution map to zero values
+        """
+        for d in self.daily_contribution_map:
+            self.daily_contribution_map[d] = 0.0
+
+    def compute_daily_contribution_map(self):
+        """
+        Compute how many commits were committed on each day
+        """
+        logger.debug("Computing contributions")
 
         # update dict with contributions
         for commits_on_day in self.commits_db:
             for commit in self.commits_db[commits_on_day]:
-                #  if user specified what days to show, skip if not included
+
+                #  if user specified what days to show, skip commit if from that day
                 if self.days and commit.date.strftime("%A") not in self.days:
                     continue
+
+                #  if user specified what months to show, skip commit from that month
+                if self.display_months and datetime.date(commit.date.year,
+                                                         commit.date.month,
+                                                         1) not in self.display_months:
+                    continue
+
                 contribution_day = datetime.date(commit.date.year,
                                                  commit.date.month,
                                                  commit.date.day)
@@ -243,7 +285,7 @@ class Githeat:
         # return months
         raise NotImplementedError
 
-    def get_graph_matrix(self):
+    def compute_graph_matrix(self):
         """
         Compute and return contribution graph matrix
 
@@ -373,13 +415,14 @@ class Githeat:
 
         """
         self.parse_commits()
+        self.init_daily_contribution_map()
         self.compute_daily_contribution_map()
         self.normalize_daily_contribution_map()
 
         if self.gtype == 'inline':
             self.print_inline()
         else:
-            matrix = self.get_graph_matrix()
+            matrix = self.compute_graph_matrix()
             self.print_graph(matrix)
 
         if self.stat:
