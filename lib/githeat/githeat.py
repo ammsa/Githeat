@@ -17,7 +17,7 @@ days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satur
 
 COLORS_GRASS = [0, 22, 28, 34, 40, 46]
 COLORS_SKY = [0, 24, 31, 38, 45, 51]
-COLORS_FIRE = [232, 220, 214, 208, 202, 196]
+COLORS_FIRE = [15, 220, 214, 208, 202, 196]
 COLORS = [COLORS_GRASS, COLORS_FIRE, COLORS_SKY]
 
 BLOCK_THICK = '   '

@@ -338,6 +338,7 @@ def print_graph(term, screen, screen_dates, x, y, graph_left_most_x, matrix, git
         x = graph_left_most_x
         y += 1
 
+
 def open_commits_terminal(new_cursor_date_value, commits_on_date):
     """
     Creates a new terminal window for showing commits info
@@ -381,10 +382,10 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
         for commit in commits_on_date:
             value = [
                 colorize(commit.abbr_commit_hash, ansi=3),
-                str(commit.date),
+                str(commit.date.strftime("%H:%M:%S %z")),
                 "\t",
                 term.bold(
-                        colorize(commit.subject, ansi=15)
+                        commit.subject
                 ),
                 colorize(commit.author, ansi=6),
                 colorize("<{}>".format(commit.author_email),

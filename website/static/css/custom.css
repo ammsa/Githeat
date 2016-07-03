@@ -95,7 +95,7 @@
 /* Larger than phone */
 @media (min-width: 550px) {
   .header {
-    margin-top: 18rem; }
+    margin-top: 15rem; }
   .value-props {
     margin-top: 3rem;
     margin-bottom: 2rem; }
