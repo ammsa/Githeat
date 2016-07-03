@@ -138,7 +138,8 @@ class Githeat:
         """
         Toggles a month to be shown and updates self.month_to_be_shown
         """
-
+        if num > len(self.months) - 1:
+            return
         self.display_months_toggle[num] = not self.display_months_toggle[num]
         self.display_months = []
         for idx, m in enumerate(self.months):

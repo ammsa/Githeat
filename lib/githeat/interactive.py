@@ -506,13 +506,11 @@ def main(argv=None):
     }.get(inp_code, csr)
 
     #  get repo
-    # g = Git("/Users/mustafa/Repos/git")
-    g = Git(os.getcwd())
+    g = Git("/Users/mustafa/Repos/git")
+    # g = Git(os.getcwd())
     githeat = Githeat(g, **vars(args))
     githeat.parse_commits()
     githeat.init_daily_contribution_map()
-    print(githeat.months)
-    print(len(githeat.months))
     githeat.compute_daily_contribution_map()
     githeat.normalize_daily_contribution_map()
     matrix = githeat.compute_graph_matrix()
