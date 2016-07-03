@@ -4,7 +4,6 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import collections
 from argparse import ArgumentParser
 from argparse import ArgumentTypeError
 
@@ -20,6 +19,8 @@ import os
 from . import __version__
 from .core import config
 from .core import logger
+from .util.interactive_navigation import Cursor
+from .util import interactive_navigation as nav
 from .githeat import Githeat
 
 __all__ = "main",
@@ -154,9 +155,6 @@ except TypeError:
 def echo_yx(cursor, text):
     """Move to ``cursor`` and display ``text``."""
     echo(cursor.term.move(cursor.y, cursor.x) + text)
-
-
-Cursor = collections.namedtuple('Cursor', ('y', 'x', 'term'))
 
 
 def redraw(term, screen, start=None, end=None):
@@ -420,90 +418,6 @@ def main(argv=None):
     logger.info("successful completion")
 
     """Program entry point."""
-    above = lambda csr, n: (
-        Cursor(y=max(0, csr.y - n),
-               x=csr.x,
-               term=csr.term))
-
-    below = lambda csr, n: (
-        Cursor(y=min(csr.term.height - 1, csr.y + n),
-               x=csr.x,
-               term=csr.term))
-
-    right_of = lambda csr, n: (
-        Cursor(y=csr.y,
-               x=min(csr.term.width - 1, csr.x + n),
-               term=csr.term))
-
-    left_of = lambda csr, n: (
-        Cursor(y=csr.y,
-               x=max(0, csr.x - n),
-               term=csr.term))
-
-    home = lambda csr: (
-        Cursor(y=csr.y,
-               x=0,
-               term=csr.term))
-
-    end = lambda csr: (
-        Cursor(y=csr.y,
-               x=csr.term.width - 1,
-               term=csr.term))
-
-    bottom = lambda csr: (
-        Cursor(y=csr.term.height - 1,
-               x=csr.x,
-               term=csr.term))
-
-    top = lambda csr: (
-        Cursor(y=0,
-               x=csr.x,
-               term=csr.term))
-
-    center = lambda csr: Cursor(
-            csr.term.height // 2,
-            csr.term.width // 2,
-            csr.term)
-
-    lookup_move = lambda inp_code, csr, term: {
-        # arrows, including angled directionals
-        csr.term.KEY_END: below(left_of(csr, 1), 1),
-        csr.term.KEY_KP_1: below(left_of(csr, 1), 1),
-
-        csr.term.KEY_DOWN: below(csr, 1),
-        csr.term.KEY_KP_2: below(csr, 1),
-
-        csr.term.KEY_PGDOWN: below(right_of(csr, 1), 1),
-        csr.term.KEY_LR: below(right_of(csr, 1), 1),
-        csr.term.KEY_KP_3: below(right_of(csr, 1), 1),
-
-        csr.term.KEY_LEFT: left_of(csr, len(githeat.width)),
-        csr.term.KEY_KP_4: left_of(csr, len(githeat.width)),
-
-        csr.term.KEY_CENTER: center(csr),
-        csr.term.KEY_KP_5: center(csr),
-
-        csr.term.KEY_RIGHT: right_of(csr, len(githeat.width)),
-        csr.term.KEY_KP_6: right_of(csr, len(githeat.width)),
-
-        csr.term.KEY_HOME: above(left_of(csr, 1), 1),
-        csr.term.KEY_KP_7: above(left_of(csr, 1), 1),
-
-        csr.term.KEY_UP: above(csr, 1),
-        csr.term.KEY_KP_8: above(csr, 1),
-
-        csr.term.KEY_PGUP: above(right_of(csr, 1), 1),
-        csr.term.KEY_KP_9: above(right_of(csr, 1), 1),
-
-        # shift + arrows
-        csr.term.KEY_SLEFT: left_of(csr, 9),
-        csr.term.KEY_SRIGHT: right_of(csr, 9),
-        csr.term.KEY_SDOWN: below(csr, 4),
-        csr.term.KEY_SUP: above(csr, 4),
-
-        # carriage return
-        # csr.term.KEY_ENTER: home(below(csr, 1)),
-    }.get(inp_code, csr)
 
     #  get repo
     g = Git("/Users/mustafa/Repos/git")
@@ -540,7 +454,7 @@ def main(argv=None):
 
         # Print header left
         header_left = unicode(os.getcwd())
-        location = home(top(csr))
+        location = nav.home(nav.top(csr))
         value = term.bold(header_left)
         echo_yx(location, value)
         screen[location.y, location.x] = value
@@ -561,7 +475,7 @@ def main(argv=None):
 
         # Print footer
         footer = term.bold(u'Please move cursor to navigate through map')
-        location = home(bottom(csr))
+        location = nav.home(nav.bottom(csr))
         value = term.ljust(footer)
         echo_yx(location, value)
         screen[location.y, location.x] = term.ljust(footer)
@@ -631,7 +545,7 @@ def main(argv=None):
                 #  print changed color footer
                 new_cursor_date_value = screen_dates.get((csr.y, csr.x))
                 if new_cursor_date_value:  # only if it needs changing
-                    location = home(bottom(csr))
+                    location = nav.home(nav.bottom(csr))
                     update_most_committers_footer(location, githeat,
                                                   new_cursor_date_value, term, screen)
                 continue
@@ -655,7 +569,7 @@ def main(argv=None):
                 continue
 
             else:
-                n_csr = lookup_move(inp.code, csr, term)
+                n_csr = nav.lookup_move(inp.code, csr, term, githeat)
 
             # only allow moves within the graph boundaries
             if not is_within_boundary(graph_right_most_x, graph_top_most_y,
@@ -666,7 +580,7 @@ def main(argv=None):
             # get value at new cursor block, if it exists
             new_cursor_date_value = screen_dates.get((n_csr.y, n_csr.x))
             if new_cursor_date_value:  # Cursor is on a date block with non-empty commits
-                location = home(bottom(csr))
+                location = nav.home(nav.bottom(csr))
                 update_most_committers_footer(location, githeat,
                                               new_cursor_date_value, term, screen)
             else:
@@ -694,7 +608,7 @@ def main(argv=None):
                     n_csr = Cursor(y, x, term)
                     new_cursor_date_value = screen_dates.get((n_csr.y, n_csr.x))
                     if new_cursor_date_value:
-                        location = home(bottom(csr))
+                        location = nav.home(nav.bottom(csr))
                         update_most_committers_footer(location, githeat,
                                                       new_cursor_date_value, term, screen)
 
@@ -720,7 +634,7 @@ def main(argv=None):
                     info = u'Please choose a date with contributions'
                     footer = term.bold_white(unicode(new_cursor_date_value)) + ' ' + info
                     value = term.ljust(footer)
-                    location = home(bottom(csr))
+                    location = nav.home(nav.bottom(csr))
                     echo_yx(location, value)
                     screen[location.y, location.x] = value
 
