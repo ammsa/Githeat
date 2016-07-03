@@ -69,7 +69,9 @@ def _cmdline(argv=None):
                         dest='days',
                         nargs='+',
                         help="Choose what days to show. Please enter list of day "
-                             "abbreviations or full name of week")
+                             "abbreviations or full name of week",
+                        default=[],
+                        )
 
     parser.add_argument('--color',
                         choices=['grass', 'fire', 'sky'],
@@ -116,7 +118,7 @@ def _cmdline(argv=None):
                         help="logger level")
 
     args = parser.parse_args(argv)
-
+    print(args)
     if args.days:
         args.days = _is_valid_days_list(args.days)
 
@@ -444,15 +446,19 @@ def update_most_committers_footer(location, githeat, date, term, screen):
     :param screen:
     :return:
     """
-    top_n = githeat.get_top_n_commiters(
-            githeat.commits_db.get(date),
-            normailze_values=True,
-            n=5
-    )
 
-    names, _ = top_authors_to_string(top_n, colors=githeat.colors)
-    msg = "{} {}".format(term.bold_white("Most committers:"), names)
-    msg = msg if names else "No commits"
+    #  uncomment condition below to hide top authors if not in user specified days
+    if not githeat.commits_db.get(date): #  or date.strftime("%A") not in githeat.days:
+        msg = "No commits"
+    else:
+        top_n = githeat.get_top_n_commiters(
+                githeat.commits_db.get(date),
+                normailze_values=True,
+                n=5
+        )
+
+        names, _ = top_authors_to_string(top_n, colors=githeat.colors)
+        msg = "{} {}".format(term.bold_white("Most committers:"), names)
 
     footer = " ".join([term.bold_white(unicode(date)), msg])
     value = term.ljust(footer)
@@ -688,16 +694,16 @@ def main(argv=None):
                                                   new_cursor_date_value, term, screen)
                 continue
             elif inp in [chr(number) for number in range(49, 49 + 7)]:
-                # 1 to 7 pressed.
+                #  1 to 7 pressed.
                 githeat.toggle_day(int(inp))
-                redraw(term, screen)
-                githeat.parse_commits()
+                #  computing new daily contributions with specific days allowed
                 githeat.compute_daily_contribution_map()
                 githeat.normalize_daily_contribution_map()
                 matrix = githeat.get_graph_matrix()
-                #  print changed color graph
+                #  print changed days graph
                 print_graph(term, screen, screen_dates, graph_x, graph_y,
                             graph_left_most_x, matrix, githeat)
+Stopf
                 continue
             # elif inp == chr(19):
             #     # ^s saves

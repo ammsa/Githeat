@@ -73,7 +73,9 @@ def _cmdline(argv=None):
                         dest='days',
                         nargs='+',
                         help="Choose what days to show. Please enter list of day "
-                             "abbreviations or full name of week")
+                             "abbreviations or full name of week",
+                        default=[],
+                        )
 
     parser.add_argument('--color',
                         choices=['grass', 'fire', 'sky'],

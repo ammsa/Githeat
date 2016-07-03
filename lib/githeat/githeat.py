@@ -83,7 +83,7 @@ class Githeat:
                 return "Empty col"
 
     def __init__(self, git_repo,
-                 gtype='block', width='reg', days=None, color='grass',
+                 gtype='block', width='reg', days=[], color='grass',
                  stat=False, stat_number=5, separate=True, month_merge=False,
                  author=None, grep=None, config=None, logging_level="CRITICAL"
                  ):
@@ -210,9 +210,13 @@ class Githeat:
         # update dict with contributions
         for commits_on_day in self.commits_db:
             for commit in self.commits_db[commits_on_day]:
+                #  if user specified what days to show, skip if not included
+                if self.days and commit.date.strftime("%A") not in self.days:
+                    continue
                 contribution_day = datetime.date(commit.date.year,
                                                  commit.date.month,
                                                  commit.date.day)
+
                 if contribution_day in self.daily_contribution_map:
                     self.daily_contribution_map[contribution_day] += 1.0
 
