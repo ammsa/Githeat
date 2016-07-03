@@ -366,9 +366,8 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
         echo_yx(location, value)
         screen[location.y, location.x] = value
 
-
         # Print header right
-        header_right = u'q to return'
+        header_right = u'^c or q to return'
         location = Cursor(0,
                           term.width - len(header_right),
                           term)
@@ -405,20 +404,20 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
             starting_y += 1
 
         while True:
-            inp2 = term.inkey()
+            inp = term.inkey()
 
-            if inp2 in [chr(81), chr(113)]:
+            if inp in [chr(81), chr(113)]:
                 break
-            elif inp2 == chr(3):
-                SystemExit(0)
+            elif inp == chr(3):
+                sys.exit(0)
 
             #  scrolling window on commits
             starting_y = 2  # to not override header text
-            if inp2.code == term.KEY_UP:
+            if inp.code == term.KEY_UP:
                 if range_from == 0:
                     continue
                 range_from -= 1
-            elif inp2.code == term.KEY_DOWN:
+            elif inp.code == term.KEY_DOWN:
                 #  skip scrolling if commits fit terminal height
                 if len(commit_values_holder[range_from:]) < term.height:
                     continue
