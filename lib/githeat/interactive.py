@@ -260,6 +260,18 @@ def is_within_boundary(boundary_right_most_x, boundary_top_most_y,
 
 
 def print_graph(term, screen, screen_dates, x, y, graph_left_most_x, matrix, githeat):
+    """
+    Prints graph
+
+    :param term:
+    :param screen:
+    :param screen_dates:
+    :param x:
+    :param y:
+    :param graph_left_most_x:
+    :param matrix:
+    :param githeat:
+    """
     #  for each day of the week
     for i in range(7):
         #  for the week column in the matrix
@@ -284,6 +296,64 @@ def print_graph(term, screen, screen_dates, x, y, graph_left_most_x, matrix, git
         y += 1
 
 
+def print_header_left(term, text, screen={}):
+    """
+    Prints text at top left of terminal
+
+    :param term:
+    :param text:
+    :param screen:
+    """
+    header_left = text
+    location = Cursor(0, 0, term)
+    value = term.bold(header_left)
+    echo_yx(location, value)
+    screen[location.y, location.x] = value
+
+
+def print_header_center(term, text, screen={}):
+    """
+    Prints text at center top of terminal
+
+    :param term:
+    :param text:
+    :param screen:
+    """
+    location = Cursor(0, (term.width // 2) - len(text) // 2, term)
+    value = term.bold(text)
+    echo_yx(location, value)
+    screen[location.y, location.x] = value
+
+
+def print_header_right(term, text, screen={}):
+    """
+    Prints text at top right of terminal
+
+    :param term:
+    :param text:
+    :param screen:
+    """
+    location = Cursor(0, term.width - len(text), term)
+    value = term.ljust(term.bold(text))
+    echo_yx(location, value)
+    screen[location.y, location.x] = value
+
+
+def print_footer_left(term, text, screen={}):
+    """
+    Prints text at bottom left of terminal
+
+    :param term:
+    :param text:
+    :param screen:
+    :return:
+    """
+    location = Cursor(term.height, 0, term)
+    value = term.ljust(text)
+    echo_yx(location, value)
+    screen[location.y, location.x] = term.ljust(text)
+
+
 def open_commits_terminal(new_cursor_date_value, commits_on_date):
     """
     Creates a new terminal window for showing commits info
@@ -296,26 +366,12 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
     with term.keypad():
         redraw(term=term, screen={})
 
-        # Print header left
-        header_left = str(new_cursor_date_value)
-        location = Cursor(0, 0, term)
-        value = term.bold(header_left)
-        echo_yx(location, value)
-        screen[location.y, location.x] = value
-
-        # Print header center
-        header_center = u'GitHeat {}'.format(__version__)
-        location = Cursor(0, (term.width // 2) - len(header_center) // 2, term)
-        value = term.bold(header_center)
-        echo_yx(location, value)
-        screen[location.y, location.x] = value
-
-        # Print header right
-        header_right = u'ESC, to return'
-        location = Cursor(0, term.width - len(header_right), term)
-        value = term.ljust(term.bold(header_right))
-        echo_yx(location, value)
-        screen[location.y, location.x] = value
+        # Print header
+        print_header_left(term, str(new_cursor_date_value), screen)
+        text = u'GitHeat {}'.format(__version__)
+        print_header_center(term, text, screen)
+        text = u'ESC, to return'
+        print_header_right(term, text, screen)
 
         #  hold the commit info that we will display depending on scrolling window edges
         commit_values_holder = []
@@ -324,12 +380,9 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
                 colorize(commit.abbr_commit_hash, ansi=3),
                 str(commit.date.strftime("%H:%M:%S %z")),
                 "\t",
-                term.bold(
-                        commit.subject
-                ),
+                term.bold(commit.subject),
                 colorize(commit.author, ansi=6),
-                colorize("<{}>".format(commit.author_email),
-                         ansi=14)
+                colorize("<{}>".format(commit.author_email), ansi=14)
             ]
 
             value = " ".join(value)
@@ -401,8 +454,7 @@ def update_most_committers_footer(location, githeat, date, term, screen):
 
     footer = " ".join([term.bold_white(unicode(date)), msg])
     value = term.ljust(footer)
-    echo_yx(location, value)
-    screen[location.y, location.x] = value
+    print_footer_left(term, value, screen)
 
 
 def main(argv=None):
@@ -411,15 +463,13 @@ def main(argv=None):
     Arguments are taken from sys.argv by default.
 
     """
+
     args = _cmdline(argv)
     logger.start(args.logging_level)
-    logger.info("starting execution")
+    logger.debug("starting execution")
     config.load(args.config)
-    logger.info("successful completion")
 
-    """Program entry point."""
-
-    #  get repo
+    #  get repo and initialize GitHeat instance
     g = Git("/Users/mustafa/Repos/git")
     # g = Git(os.getcwd())
     githeat = Githeat(g, **vars(args))
@@ -450,40 +500,20 @@ def main(argv=None):
          term.fullscreen(), \
          term.keypad():
 
-        # inp = None
-
-        # Print header left
-        header_left = unicode(os.getcwd())
-        location = nav.home(nav.top(csr))
-        value = term.bold(header_left)
-        echo_yx(location, value)
-        screen[location.y, location.x] = value
-
-        # Print header center
-        header_center = u'GitHeat {}'.format(__version__)
-        location = Cursor(0, (term.width // 2) - len(header_center) // 2, term)
-        value = term.bold(header_center)
-        echo_yx(location, value)
-        screen[location.y, location.x] = value
-
-        # Print header right
-        header_right = u'ESC, ^c to exit'
-        location = Cursor(0, term.width - len(header_right), term)
-        value = term.ljust(term.bold(header_right))
-        echo_yx(location, value)
-        screen[location.y, location.x] = value
+        # Print header
+        print_header_left(term, unicode(os.getcwd()), screen)
+        text = u'GitHeat {}'.format(__version__)
+        print_header_center(term, text, screen)
+        text = u'ESC, ^c to exit'
+        print_header_right(term, text, screen)
 
         # Print footer
-        footer = term.bold(u'Please move cursor to navigate through map')
-        location = nav.home(nav.bottom(csr))
-        value = term.ljust(footer)
-        echo_yx(location, value)
-        screen[location.y, location.x] = term.ljust(footer)
+        text = u'Please move cursor to navigate through map'
+        print_footer_left(term, term.bold(text), screen)
 
         graph_right_most_x = term.width  # initialized at terminal width
         graph_left_most_x = csr.x
         graph_top_most_y = csr.y
-
         graph_x, graph_y = csr.x, csr.y
 
         #  get graph boundaries
@@ -501,8 +531,8 @@ def main(argv=None):
             graph_y += 1
         graph_bottom_most_y = graph_y - 1
 
-        graph_x, graph_y = csr.x, csr.y
         #  print graph
+        graph_x, graph_y = csr.x, csr.y
         print_graph(term, screen, screen_dates, graph_x, graph_y,
                     graph_left_most_x, matrix, githeat)
 
@@ -557,12 +587,12 @@ def main(argv=None):
                     # key from q to ' pressed
                     githeat.toggle_month(Q_TO_QUOTES_KEYS.index(inp))
 
-                #  computing new daily contributions with specific days/months allowed
+                #  computing new daily contributions with the specified days/months
                 githeat.reset_daily_contribution_map()
                 githeat.compute_daily_contribution_map()
                 githeat.normalize_daily_contribution_map()
                 matrix = githeat.compute_graph_matrix()
-                #  print changed graph
+                #  print new filtered graph
                 print_graph(term, screen, screen_dates, graph_x, graph_y,
                             graph_left_most_x, matrix, githeat)
 
@@ -579,7 +609,7 @@ def main(argv=None):
 
             # get value at new cursor block, if it exists
             new_cursor_date_value = screen_dates.get((n_csr.y, n_csr.x))
-            if new_cursor_date_value:  # Cursor is on a date block with non-empty commits
+            if new_cursor_date_value:  # Cursor is on a date block with commits
                 location = nav.home(nav.bottom(csr))
                 update_most_committers_footer(location, githeat,
                                               new_cursor_date_value, term, screen)
@@ -632,12 +662,10 @@ def main(argv=None):
                     redraw(term=term, screen=screen)
                 else:
                     info = u'Please choose a date with contributions'
-                    footer = term.bold_white(unicode(new_cursor_date_value)) + ' ' + info
-                    value = term.ljust(footer)
-                    location = nav.home(nav.bottom(csr))
-                    echo_yx(location, value)
-                    screen[location.y, location.x] = value
+                    text = unicode(new_cursor_date_value) + ' ' + info
+                    print_footer_left(term, text, screen)
 
+    logger.debug("successful completion")
     return 0
 
 
