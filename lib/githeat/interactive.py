@@ -131,7 +131,6 @@ def _cmdline(argv=None):
 
 # python 2/3 compatibility, provide 'echo' function as an
 # alias for "print without newline and flush"
-
 try:
     # pylint: disable=invalid-name
     #         Invalid constant name "echo"
@@ -148,70 +147,12 @@ except TypeError:
         sys.stdout.flush()
 
 
-#
-# def input_filter(keystroke):
-#     """
-#     For given keystroke, return whether it should be allowed as input.
-#
-#     This somewhat requires that the interface use special
-#     application keys to perform functions, as alphanumeric
-#     input intended for persisting could otherwise be interpreted as a
-#     command sequence.
-#     """
-#     if keystroke.is_sequence:
-#         # Namely, deny multi-byte sequences (such as '\x1b[A'),
-#         return False
-#     if ord(keystroke) < ord(u' '):
-#         # or control characters (such as ^L),
-#         return False
-#     return True
-
-
 def echo_yx(cursor, text):
     """Move to ``cursor`` and display ``text``."""
     echo(cursor.term.move(cursor.y, cursor.x) + text)
 
 
 Cursor = collections.namedtuple('Cursor', ('y', 'x', 'term'))
-
-
-# def readline(term, width=20):
-#     """A rudimentary readline implementation."""
-#     text = u''
-#     while True:
-#         inp = term.inkey()
-#         if inp.code == term.KEY_ENTER:
-#             break
-#         elif inp.code == term.KEY_ESCAPE or inp == chr(3):
-#             text = None
-#             break
-#         elif not inp.is_sequence and len(text) < width:
-#             text += inp
-#             echo(inp)
-#         elif inp.code in (term.KEY_BACKSPACE, term.KEY_DELETE):
-#             text = text[:-1]
-#             echo(u'\b \b')
-#     return text
-
-
-# def save(screen, fname):
-#     """Save screen contents to file."""
-#     if not fname:
-#         return
-#     with open(fname, 'w') as fout:
-#         cur_row = cur_col = 0
-#         for (row, col) in sorted(screen):
-#             char = screen[(row, col)]
-#             while row != cur_row:
-#                 cur_row += 1
-#                 cur_col = 0
-#                 fout.write(u'\n')
-#             while col > cur_col:
-#                 cur_col += 1
-#                 fout.write(u' ')
-#             fout.write(char)
-#             cur_col += 1
-#         fout.write(u'\n')
 
 
 def redraw(term, screen, start=None, end=None):
@@ -247,8 +188,8 @@ def clear(term, start, end):
     :return:
     """
     if is_within_boundary(0, 0, term.width, term.width, start) or \
-        is_within_boundary(0, 0, term.width, term.width, end) or \
-        start.x > end.x or start.y > end.y:
+            is_within_boundary(0, 0, term.width, term.width, end) or \
+            start.x > end.x or start.y > end.y:
         raise ValueError("NOT VALID ")
         return
 
@@ -291,8 +232,8 @@ def print_graph_legend(starting_x, y, width, block_seperation_width, colors, scr
 
 
 def is_within_boundary(boundary_right_most_x, boundary_top_most_y,
-                    boundary_left_most_x, boundary_bottom_most_y,
-                    cursor):
+                       boundary_left_most_x, boundary_bottom_most_y,
+                       cursor):
     """
     Checks if cursor is within given boundary
 
@@ -336,7 +277,7 @@ def print_graph(term, screen, screen_dates, x, y, graph_left_most_x, matrix, git
 
             x += len(githeat.width)
 
-        #  reset x
+        # reset x
         x = graph_left_most_x
         y += 1
 
@@ -362,19 +303,15 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
 
         # Print header center
         header_center = u'GitHeat {}'.format(__version__)
-        location = Cursor(0, (term.width // 2) - len(
-            header_center) // 2, term)
+        location = Cursor(0, (term.width // 2) - len(header_center) // 2, term)
         value = term.bold(header_center)
         echo_yx(location, value)
         screen[location.y, location.x] = value
 
         # Print header right
         header_right = u'^c or q to return'
-        location = Cursor(0,
-                          term.width - len(header_right),
-                          term)
-        value = term.ljust(term.bold(
-                header_right))
+        location = Cursor(0, term.width - len(header_right), term)
+        value = term.ljust(term.bold(header_right))
         echo_yx(location, value)
         screen[location.y, location.x] = value
 
@@ -413,7 +350,7 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
             elif inp == chr(3):
                 sys.exit(0)
 
-            #  scrolling window on commits
+            # scrolling window on commits
             starting_y = 2  # to not override header text
             if inp.code == term.KEY_UP:
                 if range_from == 0:
@@ -448,7 +385,7 @@ def update_most_committers_footer(location, githeat, date, term, screen):
     """
 
     #  uncomment condition below to hide top authors if not in user specified days
-    if not githeat.commits_db.get(date): #  or date.strftime("%A") not in githeat.days:
+    if not githeat.commits_db.get(date):  # or date.strftime("%A") not in githeat.days:
         msg = "No commits"
     else:
         top_n = githeat.get_top_n_commiters(
@@ -672,7 +609,7 @@ def main(argv=None):
             elif inp == chr(99):
                 # c pressed, thus change color
                 githeat.switch_to_next_color()
-                #  changing colors requies regenerating matrix,
+                #  changing colors requires regenerating matrix,
                 #  because values there are colorized strings, harder to change
                 matrix = githeat.get_graph_matrix()
                 #  print changed color graph
@@ -680,11 +617,11 @@ def main(argv=None):
                             graph_left_most_x, matrix, githeat)
                 #  print changed color legend
                 print_graph_legend(legend_x, legend_y,
-                           githeat.width,
-                           block_separation_width,
-                           githeat.colors,
-                           screen,
-                           term)
+                                   githeat.width,
+                                   block_separation_width,
+                                   githeat.colors,
+                                   screen,
+                                   term)
 
                 #  print changed color footer
                 new_cursor_date_value = screen_dates.get((csr.y, csr.x))
@@ -703,30 +640,16 @@ def main(argv=None):
                 #  print changed days graph
                 print_graph(term, screen, screen_dates, graph_x, graph_y,
                             graph_left_most_x, matrix, githeat)
-Stopf
-                continue
-            # elif inp == chr(19):
-            #     # ^s saves
-            #     echo_yx(home(bottom(csr)),
-            #             term.ljust(term.bold_white(u'Filename: ')))
-            #     echo_yx(right_of(home(bottom(csr)), len(u'Filename: ')), u'')
-            #     save(screen, readline(term))
-            #     echo_yx(home(bottom(csr)), term.clear_eol)
-            #     redraw(term=term, screen=screen,
-            #            start=home(bottom(csr)),
-            #            end=end(bottom(csr)))
-            #     continue
 
-            # elif inp == chr(12):
-            #     # ^l refreshes
-            #     redraw(term=term, screen=screen)
+                continue
+
             else:
                 n_csr = lookup_move(inp.code, csr, term)
 
             # only allow moves within the graph boundaries
             if not is_within_boundary(graph_right_most_x, graph_top_most_y,
-                                   graph_left_most_x, graph_bottom_most_y,
-                                   n_csr):
+                                      graph_left_most_x, graph_bottom_most_y,
+                                      n_csr):
                 continue
 
             # get value at new cursor block, if it exists
@@ -734,7 +657,7 @@ Stopf
             if new_cursor_date_value:  # Cursor is on a date block with non-empty commits
                 location = home(bottom(csr))
                 update_most_committers_footer(location, githeat,
-                                             new_cursor_date_value, term, screen)
+                                              new_cursor_date_value, term, screen)
             else:
 
                 horizontal_empty = False
