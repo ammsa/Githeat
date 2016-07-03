@@ -13,7 +13,7 @@ from xtermcolor import colorize
 from .core import logger
 from .util import helpers
 
-days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 COLORS_GRASS = [0, 22, 28, 34, 40, 46]
 COLORS_SKY = [0, 24, 31, 38, 45, 51]
@@ -93,6 +93,7 @@ class Githeat:
         self.gtype = gtype
         self.width = BLOCK_REG
         self.days = days
+        self.days_toggle = [False] * 7
         self.colors_iterator = cycle(COLORS)
         self.colors = self.switch_to_next_color()
 
@@ -122,6 +123,13 @@ class Githeat:
 
         logger.start(logging_level)
         logger.debug("initialing githeat instance")
+
+    def toggle_day(self, day_num):
+        """
+        Toggles a day to be shown and updates self.days
+        """
+        self.days_toggle[day_num - 1] = not self.days_toggle[day_num - 1]  # toggle day
+        self.days = [d for idx, d in enumerate(DAYS) if self.days_toggle[idx]]
 
     def switch_to_next_color(self):
         """
@@ -282,7 +290,7 @@ class Githeat:
 
                 #  if next_day (which is first day of new month) starts in middle of the
                 #  week, prepend empty blocks in the column before inserting 'next day'
-                next_day_num = days.index(next_day.strftime("%A"))
+                next_day_num = DAYS.index(next_day.strftime("%A"))
                 last_week_col.fill_by(next_day_num)
 
         # make sure that the most current week (last col of matrix) col is of size 7,

@@ -620,7 +620,6 @@ def main(argv=None):
 
         graph_right_most_x = term.width  # initialized at terminal width
         graph_left_most_x = csr.x
-        graph_bottom_most_y = term.height  # initialized at terminal height
         graph_top_most_y = csr.y
 
         graph_x, graph_y = csr.x, csr.y
@@ -665,7 +664,7 @@ def main(argv=None):
                 # ^c or q or Q to exits
                 break
             elif inp == chr(99):
-                # c pressed
+                # c pressed, thus change color
                 githeat.switch_to_next_color()
                 #  changing colors requies regenerating matrix,
                 #  because values there are colorized strings, harder to change
@@ -687,6 +686,18 @@ def main(argv=None):
                     location = home(bottom(csr))
                     update_most_committers_footer(location, githeat,
                                                   new_cursor_date_value, term, screen)
+                continue
+            elif inp in [chr(number) for number in range(49, 49 + 7)]:
+                # 1 to 7 pressed.
+                githeat.toggle_day(int(inp))
+                redraw(term, screen)
+                githeat.parse_commits()
+                githeat.compute_daily_contribution_map()
+                githeat.normalize_daily_contribution_map()
+                matrix = githeat.get_graph_matrix()
+                #  print changed color graph
+                print_graph(term, screen, screen_dates, graph_x, graph_y,
+                            graph_left_most_x, matrix, githeat)
                 continue
             # elif inp == chr(19):
             #     # ^s saves
