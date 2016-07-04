@@ -203,43 +203,78 @@
 
     <div class="docs-section" id="examples">
         <h6 class="docs-header">Examples</h6>
-        <p>Suppose you want to quickly display the heatmap, just <code>cd</code> to your project root (where .git is stored) and run:
-<pre><code>githeat</code></pre>
+        <h6 class="docs-header">CLI Examples</h6>
+        <p>Want to quickly display the heatmap?, just <code>cd</code> to your project root
+            (where .git is stored) and run:
+        <pre><code>githeat</code></pre>
         <img src="static/images/githeat_cli.png">
         </p>
 
         <p>Want to merge in the months? run:
-<pre><code>githeat  --month-merge</code></pre>
+        <pre><code>githeat --month-merge</code></pre>
         </p>
 
         <p>Want to separate each day block? run:
-<pre><code>githeat  --separate</code></pre>
+        <pre><code>githeat --separate</code></pre>
         </p>
 
-        <p>Want to change the width of each block? choose between <code>thin, reg, thick</code>:
-<pre><code>githeat  --width {thick,reg,thin}</code></pre>
+        <p>Want to change the width of each block? choose between <code>thin, reg,
+            thick</code>:
+        <pre><code>githeat --width {thick,reg,thin}</code></pre>
         </p>
 
-        <p>Want to change the color of the graph? choose between <code>grass, sky, fire</code>:
-<pre><code>githeat  --color {grass,fire,sky}</code></pre>
+        <p>Want to change the color of the graph? choose between <code>grass, sky,
+            fire</code>:
+        <pre><code>githeat --color {grass,fire,sky}</code></pre>
         </p>
 
-        <p>Want to show who are the top 10 most committers? run and it will parse the days for you:
-<pre><code>githeat  --stat --stat-number 10</code></pre>
+        <p>Want to show who are the top 10 most committers? run and it will parse the days
+            for you:
+        <pre><code>githeat --stat --stat-number 10</code></pre>
         </p>
 
         <p>Want to filter out commits by author? write regex in the author argument:
-<pre><code>githeat  --author="Will|Bill|"</code></pre>
+        <pre><code>githeat --author="Will|Bill|"</code></pre>
         </p>
 
-        <p>Want to filter out commits by keywords in commit? write regex in the grep argument:
-<pre><code>githeat  --grep="Fix"</code></pre>
+        <p>Want to filter out commits by keywords in commit? write regex in the grep
+            argument:
+        <pre><code>githeat --grep="Fix"</code></pre>
         </p>
 
-        <p>Have a specific YAML configuration file you want to use? pass it to the config argument:
-<pre><code>githeat  --config PATH_TO_CONFIG.yaml</code></pre>
+        <p>Have a specific YAML configuration file you want to use? pass it to the config
+            argument:
+        <pre><code>githeat --config PATH_TO_CONFIG.yaml</code></pre>
         </p>
 
+        <p>Need help? run:
+        <pre><code>githeat -h</code></pre>
+        </p>
+
+
+        <h6 class="docs-header">Interactive Examples</h6>
+        <p>Want to navigate through map and interact with it? <code>cd</code> to your
+            repo's root and run:
+        <pre><code>githeat.interactive</code></pre>
+        Use the arrows on your keyboard to navigate to a specific day. Press
+        <code>enter</code> on a specific day to show the commits on that day. Press any
+        key from <code>1</code> to <code>7</code> to show specific days. Press any key
+        from <code>q</code> to <code>'</code> to show specific months.
+        Press <code>c</code> to change colors.
+        </p>
+
+
+        <p>Need help? run:
+        <pre><code>githeat.interactive -h</code></pre>
+        </p>
+    </div>
+
+    <div class="docs-section" id="roadmap">
+        <h6 class="docs-header">Roadmap</h6>
+    </div>
+
+    <div class="docs-section" id="issues">
+        <h6 class="docs-header">issues</h6>
     </div>
 </div>
 
