@@ -335,7 +335,7 @@ def print_header_right(term, text, screen={}):
     :param screen:
     """
     location = Cursor(0, term.width - len(text), term)
-    value = term.ljust(term.bold(text))
+    value = term.bold(text)
     echo_yx(location, value)
     screen[location.y, location.x] = value
 
@@ -350,7 +350,7 @@ def print_footer_left(term, text, screen={}):
     :return:
     """
     location = Cursor(term.height - 1, 0, term)
-    value = term.ljust(text)
+    value = text
     echo_yx(location, value)
     screen[location.y, location.x] = value
 
