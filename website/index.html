@@ -62,10 +62,14 @@
             <ul class="navbar-list">
                 <li class="navbar-item"><a class="navbar-link" href="#intro">Intro</a>
                 </li>
-                <li class="navbar-item"><a class="navbar-link" href="#code">Code</a>
+                <li class="navbar-item"><a class="navbar-link" href="#how">How it works</a>
 
-                <li class="navbar-item"><a class="navbar-link"
-                                           href="#examples">Examples</a>
+                <li class="navbar-item"><a class="navbar-link" href="#install">Install</a>
+
+                <li class="navbar-item"><a class="navbar-link" href="#examples">Examples</a>
+
+                <li class="navbar-item"><a class="navbar-link" href="#configuration">Configuration</a>
+
                 </li>
                 <li class="navbar-item">
                     <a class="navbar-link" href="#"
@@ -150,55 +154,22 @@
             Because of this, git doesnt need to ask a remote server to operate or to look
             up history to display it for you.
             Everything it needs is read directly from a local database on a hidden .git
-            directory under your project root dir. In your terminal, you can try out
-            running <code>git log</code> and you will the commits you and other
-            contributors have made to the repository</p>
+            directory under your project root directory. In your terminal, you can try out
+            running <code>git log</code> and you will see all the commits you and other
+            contributors have made to the repository. It nice, but let us visualize it.</p>
         <p>Now most of us are familiar with the heatmaps GitHub displays in every profile,
             right? Pretty cool feature. It shows you how active is a user, how many
-            commits he pushes on a certain day or month, etc.
-            What Githeat does is create an interactive heatmap, not for a specific user,
+            commits the pushes on a certain day or month, etc.
+            Githeat allows you to interact and visualize a heatmap, not for a specific user,
             but for a specific repo. It will show you how many commits have been committed
-            on each day starting from last year, and who are the top committers on a
-            single day, and what days are most active. Githeat does all of this offline
+            on each day during the past year, who are the top committers on a
+            single day, what days are most active, and so on. Githeat does all of this offline
             and in your terminal, using just your git local database.</p>
     </div>
 
     <div class="docs-section" id="install">
         <h6 class="docs-header">Installation</h6>
         <p>installation here</p>
-    </div>
-
-    <div class="docs-section" id="configuration">
-        <h6 class="docs-header">Configuration</h6>
-        <p>Configuration here</p>
-    </div>
-
-    <div class="docs-section" id="code">
-        <h6 class="docs-header">Code</h6>
-        <p>Code styling is kept basic – just wrap anything in a <code>&lt;code&gt;</code>
-            and it will appear like <code>this</code>. For blocks of code, wrap a <code>
-                &lt;code&gt;</code> with a <code>&lt;pre&gt;</code>.</p>
-        <div class="docs-example">
-<pre>
-    <code>.some-class {
-        background-color: red;
-        }</code>
-</pre>
-        </div>
-
-
-        <!-- CODE EXAMPLE ———————————————————————————————————————— -->
-<pre class="code-example"><code>
-    &lt;pre&gt;&lt;code&gt;.some-class
-    {
-    background-color: red;
-    }&lt;/code&gt;&lt;/pre&gt;
-
-    &lt;!-- Remember every whitespace and break will be preserved in a &lt;pre&gt;,
-    including indentation in your code --&gt;
-</code>
-</pre>
-        <!-- ————————————————————————————————————————————————————— -->
     </div>
 
     <div class="docs-section" id="examples">
@@ -267,6 +238,11 @@
         <p>Need help? run:
         <pre><code>githeat.interactive -h</code></pre>
         </p>
+    </div>
+
+    <div class="docs-section" id="configuration">
+        <h6 class="docs-header">Configuration</h6>
+        <p>Configuration here</p>
     </div>
 
     <div class="docs-section" id="roadmap">

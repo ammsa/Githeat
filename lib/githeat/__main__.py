@@ -151,7 +151,7 @@ def main(argv=None):
     config.load(args.config)
 
     try:
-        g = Git("/Users/mustafa/Repos/git")
+        g = Git(os.getcwd())
         githeat = Githeat(g, **vars(args))
         githeat.run()
 

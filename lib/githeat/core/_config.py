@@ -81,7 +81,6 @@ class _Config(_AttrDict):
             except TypeError:  # load() returned None
                 logger.warn("config file '{:s}' is empty".format(yaml))
             except IOError:
-                print(path)
                 logger.warn("config file '{:s}' does not exist".format(path))
         return
 

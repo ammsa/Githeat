@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """ Implementation of interactive githeat.
 
 """
@@ -351,6 +352,32 @@ def print_footer_left(term, text, screen={}):
     screen[location.y, location.x] = value
 
 
+def resize_until_fit(texts_list, width):
+    """
+    Removes from end of text_list such that the length of elements in text_lest fit width
+
+    :param texts_list:
+    :param width:
+    :return: text_list modified to fit with width
+    """
+
+    lengths = sum([len(x) for x in texts_list])
+    if lengths < width:
+        return texts_list
+
+    diff = lengths - width
+    for idx, text in reversed(list(enumerate(texts_list))):
+        texts_list[idx] = texts_list[idx][:-diff]
+        lengths = sum([len(x) for x in texts_list])
+
+        if lengths <= width:
+            break
+
+        diff = lengths - width
+
+    return texts_list
+
+
 def open_commits_terminal(new_cursor_date_value, commits_on_date):
     """
     Creates a new terminal window for showing commits info
@@ -373,13 +400,25 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
         #  hold the commit info that we will display depending on scrolling window edges
         commit_values_holder = []
         for commit in commits_on_date:
+            commit_hash, cdate, spaces, subject, author, email, = resize_until_fit(
+                    [
+                        commit.abbr_commit_hash,
+                        str(commit.date.strftime("%H:%M:%S %z")),
+                        "  ",
+                        commit.subject,
+                        commit.author,
+                        commit.author_email,
+                    ],
+                    term.width - 7  # for spaces and '<', '>' between emails
+            )
+
             value = [
-                colorize(commit.abbr_commit_hash, ansi=3),
-                str(commit.date.strftime("%H:%M:%S %z")),
-                "\t",
-                term.bold(commit.subject),
-                colorize(commit.author, ansi=6),
-                colorize("<{}>".format(commit.author_email), ansi=14)
+                colorize(commit_hash, ansi=3),
+                cdate,
+                spaces,
+                term.bold(subject),
+                colorize(author, ansi=6),
+                colorize("<{}>".format(email), ansi=14)
             ]
 
             value = " ".join(value)
@@ -468,8 +507,7 @@ def main(argv=None):
     vars(args).update(config)
 
     #  get repo and initialize GitHeat instance
-    g = Git("/Users/mustafa/Repos/git")
-    # g = Git(os.getcwd())
+    g = Git(os.getcwd())
     githeat = Githeat(g, **vars(args))
     githeat.parse_commits()
     githeat.init_daily_contribution_map()

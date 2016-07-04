@@ -32,7 +32,9 @@ _CONFIG = {
     "package_dir": {"": "lib"},
     "packages": find_packages("lib"),
     "entry_points": {
-        "console_scripts": ("cli = githeat.cli:main",),
+        "console_scripts": ["githeat = githeat:main",
+                            "githeat.interactive = githeat.interactive:main",
+                            ],
     },
     "data_files": list(chain.from_iterable(_listdir(root) for root in _DATA))
 }
