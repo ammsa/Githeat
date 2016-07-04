@@ -123,3 +123,16 @@ def remove_accents(input_str):
     nfkd_form = unicodedata.normalize('NFKD', input_str)
     only_ascii = nfkd_form.encode('ASCII', 'ignore')
     return only_ascii
+
+def first(iterable, func=lambda L: L is not None, **kwargs):
+    """
+    Get first non none iterm from list
+    :param iterable:
+    :param func:
+    :param kwargs:
+    :return:
+    """
+    it = (el for el in iterable if func(el))
+    if 'default' in kwargs:
+        return next(it, kwargs['default'])
+    return next(it) # no default so raise `StopIteration`

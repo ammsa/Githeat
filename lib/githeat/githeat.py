@@ -316,23 +316,15 @@ class Githeat:
         :return:
         """
 
-        matrix_width = 0
         if self.month_merge:
-            if self.width == BLOCK_THIN:
-                matrix_width = len(matrix) + 11 * len(BLOCK_THIN)
-            elif self.width == BLOCK_REG:
-                matrix_width = len(matrix) + 11 * len(BLOCK_REG)
-            elif self.width == BLOCK_THICK:
-                matrix_width = len(matrix) + 11 * len(BLOCK_THICK)
+            start_date = matrix[0].col[0][0]
+            end_date = [x[0] for x in matrix[-1].col if x[0] is not None][-1]
+            delta = end_date - start_date
+            width = delta.days // 7
         else:
-            if self.width == BLOCK_THIN:
-                matrix_width = len(matrix) * len(BLOCK_THIN)
-            elif self.width == BLOCK_REG:
-                matrix_width = len(matrix) * len(BLOCK_REG)
-            elif self.width == BLOCK_THICK:
-                matrix_width = len(matrix) * len(BLOCK_THICK)
+            width = len(matrix)
 
-        return matrix_width
+        return width * len(self.width)
 
     def compute_graph_matrix(self):
         """
