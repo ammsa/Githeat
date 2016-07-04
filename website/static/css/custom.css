@@ -6,6 +6,9 @@
   width: 100%;
   margin-bottom: 4rem;
 }
+.docs-section img{
+  width: 100%;
+}
 .container {
   max-width: 800px; }
 .header {

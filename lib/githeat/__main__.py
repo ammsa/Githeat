@@ -101,9 +101,9 @@ def _cmdline(argv=None):
 
     parser.add_argument('--month-merge',
                         dest='month_merge',
-                        action='store_false',
+                        action='store_true',
                         help='Separate each month',
-                        default=True)
+                        default=False)
 
     parser.add_argument('--author', '-a',
                         help='Filter heatmap by author. You can also write regex here')
@@ -151,7 +151,7 @@ def main(argv=None):
     config.load(args.config)
 
     try:
-        g = Git(os.getcwd())
+        g = Git("/Users/mustafa/Repos/git")
         githeat = Githeat(g, **vars(args))
         githeat.run()
 

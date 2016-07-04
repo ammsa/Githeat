@@ -156,16 +156,21 @@
         <p>Now most of us are familiar with the heatmaps GitHub displays in every profile,
             right? Pretty cool feature. It shows you how active is a user, how many
             commits he pushes on a certain day or month, etc.
-            What Githeat does is create a heatmap, not for a specific user, but for a
-            specific repo. It will show you how many commits have been committed on each
-            day starting from last year, and who are the top committers on a single day,
-            and what days are most active. Githeat does all of this offline and in your
-            terminal, using just your git local database.</p>
+            What Githeat does is create an interactive heatmap, not for a specific user,
+            but for a specific repo. It will show you how many commits have been committed
+            on each day starting from last year, and who are the top committers on a
+            single day, and what days are most active. Githeat does all of this offline
+            and in your terminal, using just your git local database.</p>
     </div>
 
     <div class="docs-section" id="install">
         <h6 class="docs-header">Installation</h6>
         <p>installation here</p>
+    </div>
+
+    <div class="docs-section" id="configuration">
+        <h6 class="docs-header">Configuration</h6>
+        <p>Configuration here</p>
     </div>
 
     <div class="docs-section" id="code">
@@ -196,10 +201,44 @@
         <!-- ————————————————————————————————————————————————————— -->
     </div>
 
-
     <div class="docs-section" id="examples">
         <h6 class="docs-header">Examples</h6>
-        <p>Examples here</p>
+        <p>Suppose you want to quickly display the heatmap, just <code>cd</code> to your project root (where .git is stored) and run:
+<pre><code>githeat</code></pre>
+        <img src="static/images/githeat_cli.png">
+        </p>
+
+        <p>Want to merge in the months? run:
+<pre><code>githeat  --month-merge</code></pre>
+        </p>
+
+        <p>Want to separate each day block? run:
+<pre><code>githeat  --separate</code></pre>
+        </p>
+
+        <p>Want to change the width of each block? choose between <code>thin, reg, thick</code>:
+<pre><code>githeat  --width {thick,reg,thin}</code></pre>
+        </p>
+
+        <p>Want to change the color of the graph? choose between <code>grass, sky, fire</code>:
+<pre><code>githeat  --color {grass,fire,sky}</code></pre>
+        </p>
+
+        <p>Want to show who are the top 10 most committers? run and it will parse the days for you:
+<pre><code>githeat  --stat --stat-number 10</code></pre>
+        </p>
+
+        <p>Want to filter out commits by author? write regex in the author argument:
+<pre><code>githeat  --author="Will|Bill|"</code></pre>
+        </p>
+
+        <p>Want to filter out commits by keywords in commit? write regex in the grep argument:
+<pre><code>githeat  --grep="Fix"</code></pre>
+        </p>
+
+        <p>Have a specific YAML configuration file you want to use? pass it to the config argument:
+<pre><code>githeat  --config PATH_TO_CONFIG.yaml</code></pre>
+        </p>
 
     </div>
 </div>
