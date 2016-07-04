@@ -99,9 +99,9 @@ def _cmdline(argv=None):
 
     parser.add_argument('--hide-legend',
                         dest='legend',
-                        action='store_false',
+                        action='store_true',
                         help="Hide legend",
-                        default=True)
+                        default=False)
 
     parser.add_argument('--author', '-a',
                         help='Filter heatmap by author. You can also write regex here')
@@ -574,10 +574,10 @@ def main(argv=None):
                     graph_left_most_x, matrix, githeat)
 
         # print legend
-        if githeat.hide_legend:
-            block_separation_width = 4
-            legend_x = (term.width - len(githeat.colors) * block_separation_width) // 2
-            legend_y = graph_bottom_most_y + 5
+        block_separation_width = 4
+        legend_x = (term.width - len(githeat.colors) * block_separation_width) // 2
+        legend_y = graph_bottom_most_y + 5
+        if not githeat.hide_legend:
             print_graph_legend(legend_x, legend_y,
                                githeat.width,
                                block_separation_width,
@@ -602,13 +602,15 @@ def main(argv=None):
                 #  print changed color graph
                 print_graph(term, screen, screen_dates, graph_x, graph_y,
                             graph_left_most_x, matrix, githeat)
+
                 #  print changed color legend
-                print_graph_legend(legend_x, legend_y,
-                                   githeat.width,
-                                   block_separation_width,
-                                   githeat.colors,
-                                   screen,
-                                   term)
+                if not githeat.hide_legend:
+                    print_graph_legend(legend_x, legend_y,
+                                       githeat.width,
+                                       block_separation_width,
+                                       githeat.colors,
+                                       screen,
+                                       term)
 
                 #  print changed color footer
                 new_cursor_date_value = screen_dates.get((csr.y, csr.x))

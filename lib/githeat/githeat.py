@@ -86,7 +86,7 @@ class Githeat:
     def __init__(self, git_repo,
                  gtype='block', width='reg', days=[], color='grass', colors=[],
                  stat=False, stat_number=5, separate=True, month_merge=False,
-                 legend=False, author=None, grep=None, config=None,
+                 legend=True, author=None, grep=None, config=None,
                  logging_level="CRITICAL"
                  ):
         self.git_repo = git_repo
