@@ -1,1 +1,13 @@
-# Runtime configuration for the githeat application.
+# Example runtime configuration for the githeat application. Put in home dir (~/.githeat)
+
+colors: [
+   [0, 22, 28, 34, 40, 46],
+   [0, 24, 31, 38, 45, 51],
+   [0, 220, 214, 208, 202, 196]
+ ]
+width: "reg"
+month_merge: false
+separate: true
+author: ""
+grep: ""
+

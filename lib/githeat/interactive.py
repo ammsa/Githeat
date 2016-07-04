@@ -3,19 +3,15 @@
 """
 from __future__ import absolute_import
 from __future__ import print_function
-
 from argparse import ArgumentParser
 from argparse import ArgumentTypeError
-
-import functools
-from git import Git
-
 from blessed import Terminal
 from dateutil.parser import parse as parse_date
+import functools
+from git import Git
 import re
-from xtermcolor import colorize
 import os
-
+from xtermcolor import colorize
 from . import __version__
 from .core import config
 from .core import logger
@@ -29,8 +25,7 @@ DAY_REGEX = r"(?i)^(Sun|Mon|(T(ues|hurs))|Fri)(day|\.)" \
             r"?$|Wed(\.|nesday)?$|Sat(\.|urday)?$|T((ue?)|(hu?r?))\.?$"
 
 ONE_TO_SEVEN_KEYS = [chr(number) for number in range(49, 56)]  # 1 to 7
-Q_TO_QUOTES_KEYS = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p",
-                          "[", "]", "\\", "'"]
+Q_TO_QUOTES_KEYS = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\", "'"]
 QUIT_KEYS = [chr(27), chr(3)]  # esc, ^c keys
 
 
@@ -130,7 +125,9 @@ def _cmdline(argv=None):
     if not args.config:
         # Don't specify this as an argument default or else it will always be
         # included in the list.
-        args.config = ["etc/config.yml"]
+        args.config = ["etc/config.yml",
+                       os.path.expanduser('~/.githeat')]
+
     return args
 
 
@@ -191,7 +188,7 @@ def clear(term, start, end):
     """
     if is_within_boundary(0, 0, term.width, term.width, start) or \
             is_within_boundary(0, 0, term.width, term.width, end) or \
-            start.x > end.x or start.y > end.y:
+                    start.x > end.x or start.y > end.y:
         raise ValueError("NOT VALID ")
         return
 
@@ -468,6 +465,7 @@ def main(argv=None):
     logger.start(args.logging_level)
     logger.debug("starting execution")
     config.load(args.config)
+    vars(args).update(config)
 
     #  get repo and initialize GitHeat instance
     g = Git("/Users/mustafa/Repos/git")
@@ -587,10 +585,8 @@ def main(argv=None):
                     # key from q to ' pressed
                     githeat.toggle_month(Q_TO_QUOTES_KEYS.index(inp))
 
-                #  computing new daily contributions with the specified days/months
-                githeat.reset_daily_contribution_map()
-                githeat.compute_daily_contribution_map()
-                githeat.normalize_daily_contribution_map()
+                # re-computing new daily contributions with the specified days/months
+                githeat.recompute_daily_contribution_map()
                 matrix = githeat.compute_graph_matrix()
                 #  print new filtered graph
                 print_graph(term, screen, screen_dates, graph_x, graph_y,
@@ -619,9 +615,9 @@ def main(argv=None):
 
                 #  jump through empty values
                 while not new_cursor_date_value and is_within_boundary(
-                        graph_right_most_x - 1,
+                                graph_right_most_x - 1,
                         graph_top_most_y,
-                        graph_left_most_x + 1,
+                                graph_left_most_x + 1,
                         graph_bottom_most_y,
                         n_csr):
 

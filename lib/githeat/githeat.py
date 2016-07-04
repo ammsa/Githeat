@@ -17,7 +17,7 @@ DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satur
 
 COLORS_GRASS = [0, 22, 28, 34, 40, 46]
 COLORS_SKY = [0, 24, 31, 38, 45, 51]
-COLORS_FIRE = [15, 220, 214, 208, 202, 196]
+COLORS_FIRE = [0, 220, 214, 208, 202, 196]
 COLORS = [COLORS_GRASS, COLORS_FIRE, COLORS_SKY]
 
 BLOCK_THICK = '   '
@@ -83,7 +83,7 @@ class Githeat:
                 return "Empty col"
 
     def __init__(self, git_repo,
-                 gtype='block', width='reg', days=[], color='grass',
+                 gtype='block', width='reg', days=[], color='grass', colors=[],
                  stat=False, stat_number=5, separate=True, month_merge=False,
                  author=None, grep=None, config=None, logging_level="CRITICAL"
                  ):
@@ -97,6 +97,9 @@ class Githeat:
         self.months = []
         self.display_months = []
         self.display_months_toggle = []
+        global COLORS
+        if colors:
+            COLORS = colors
         self.colors_iterator = cycle(COLORS)
         self.colors = self.switch_to_next_color()
 
@@ -233,6 +236,8 @@ class Githeat:
         """
         Resets daily contribution map to zero values
         """
+        logger.debug("resetting contributions")
+
         for d in self.daily_contribution_map:
             self.daily_contribution_map[d] = 0.0
 
@@ -263,12 +268,28 @@ class Githeat:
                 if contribution_day in self.daily_contribution_map:
                     self.daily_contribution_map[contribution_day] += 1.0
 
-    def normalize_daily_contribution_map(self):
+    def normalize_daily_contribution_map(self, x1=0, x2=5):
+        """
+        Normalizes daily contribution to values between [x1, x2]
+        Default is set to [0, 5] because we have 6 colors
+        :param x2: range to
+        :param x1: range from
+        """
         logger.debug("Normalizing contributions")
 
-        # normalize values between [0, 5] because we have six colors
+        # normalize values to be between [x1, x2]
         self.daily_contribution_map = helpers.normalize_dict(self.daily_contribution_map,
-                                                             0, 5)
+                                                             x1, x2)
+
+    def recompute_daily_contribution_map(self):
+        """
+        Recompute daily contribution and new normalized values
+        """
+        logger.debug("Recomputing contributions")
+
+        self.reset_daily_contribution_map()
+        self.compute_daily_contribution_map()
+        self.normalize_daily_contribution_map()
 
     def print_graph_month_header(self):
         """

@@ -3,3 +3,4 @@
 ##    pip install --requirement=requirements.txt
 ##
 pytest>=2.9
+mock

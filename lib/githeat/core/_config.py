@@ -67,19 +67,22 @@ class _Config(_AttrDict):
                   params.iteritems()} if params else {}
         regex = compile("|".join(params) or r"^(?!)")
         for path in paths:
-            with open(path, "r") as stream:
-                # Global text substitution is used for parameter replacement.
-                # Two drawbacks of this are 1) the entire config file has to be
-                # read into memory first; 2) it might be nice if comments were
-                # excluded from replacement. A more elegant (but complex)
-                # approach would be to use PyYAML's various hooks to do the
-                # substitution as the file is parsed.
-                logger.info("reading config data from {:s}".format(path))
-                yaml = regex.sub(replace, stream.read())
             try:
-                self.update(load(yaml))
+                with open(path, "r") as stream:
+                    # Global text substitution is used for parameter replacement.
+                    # Two drawbacks of this are 1) the entire config file has to be
+                    # read into memory first; 2) it might be nice if comments were
+                    # excluded from replacement. A more elegant (but complex)
+                    # approach would be to use PyYAML's various hooks to do the
+                    # substitution as the file is parsed.
+                    logger.info("reading config data from {:s}".format(path))
+                    yaml = regex.sub(replace, stream.read())
+                    self.update(load(yaml))
             except TypeError:  # load() returned None
                 logger.warn("config file '{:s}' is empty".format(yaml))
+            except IOError:
+                print(path)
+                logger.warn("config file '{:s}' does not exist".format(path))
         return
 
 
