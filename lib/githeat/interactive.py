@@ -345,10 +345,10 @@ def print_footer_left(term, text, screen={}):
     :param screen:
     :return:
     """
-    location = Cursor(term.height, 0, term)
+    location = Cursor(term.height - 1, 0, term)
     value = term.ljust(text)
     echo_yx(location, value)
-    screen[location.y, location.x] = term.ljust(text)
+    screen[location.y, location.x] = value
 
 
 def open_commits_terminal(new_cursor_date_value, commits_on_date):
