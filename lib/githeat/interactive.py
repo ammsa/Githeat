@@ -205,20 +205,17 @@ def clear(term, start, end):
 
 
 def top_authors_to_string(top_authors, colors=None):
-    authors_colorized = []
-    authors_non_colorized = []
+    authors = []
     if top_authors:
         for tup in top_authors:
             if colors:
-                author_string = colorize(tup[0],
-                                         ansi=colors[int(tup[1])])
+                author_string = colorize(tup[0], ansi=colors[int(tup[1])])
             else:
                 author_string = tup[0]
-            authors_colorized.append(author_string)
-            authors_non_colorized.append(tup[0])
+            authors.append(author_string)
 
-    top_n_authors = ", ".join(authors_colorized)
-    return top_n_authors, len(", ".join(authors_non_colorized))
+    top_n_authors = ", ".join(authors)
+    return top_n_authors
 
 
 def print_graph_legend(starting_x, y, width, block_seperation_width, colors, screen,
@@ -485,7 +482,7 @@ def update_most_committers_footer(location, githeat, date, term, screen):
                 n=5
         )
 
-        names, _ = top_authors_to_string(top_n, colors=githeat.colors)
+        names = top_authors_to_string(top_n, colors=githeat.colors)
         msg = "{} {}".format(term.bold_white("Most committers:"), names)
 
     footer = " ".join([term.bold_white(unicode(date)), msg])
@@ -504,11 +501,11 @@ def main(argv=None):
     logger.start(args.logging_level)
     logger.debug("starting execution")
     config.load(args.config)
-    vars(args).update(config)
+    config.update(**vars(args))
 
     #  get repo and initialize GitHeat instance
     g = Git(os.getcwd())
-    githeat = Githeat(g, **vars(args))
+    githeat = Githeat(g, **config)
     githeat.parse_commits()
     githeat.init_daily_contribution_map()
     githeat.compute_daily_contribution_map()
@@ -516,16 +513,12 @@ def main(argv=None):
     matrix = githeat.compute_graph_matrix()
 
     term = Terminal()
-    if githeat.month_merge:
-        if len(githeat.width) == 1:  # thin
-            new_width = (term.width - len(matrix) + (11 * 2)) // 2
-        else:
-            new_width = (term.width - len(matrix) - 11 * 2) // 2
-    else:
-        if len(githeat.width) == 1:  # thin
-            new_width = (term.width - len(matrix)) // 2
-        else:
-            new_width = (term.width - len(matrix) * 2) // 2
+    matrix_width = githeat.get_matrix_width(matrix)
+    if matrix_width > term.width:
+        print("Your terminal width is smaller than the heatmap. Please consider using "
+              "the --width {thin, reg, thick} argument or resize your terminal.")
+        return 0
+    new_width = (term.width - matrix_width) // 2
     csr = Cursor(term.height // 2 - 3, new_width, term)
 
     screen = {}

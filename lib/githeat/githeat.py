@@ -88,7 +88,6 @@ class Githeat:
                  stat=False, stat_number=5, separate=True, month_merge=False,
                  author=None, grep=None, config=None, logging_level="CRITICAL"
                  ):
-
         self.git_repo = git_repo
 
         self.gtype = gtype
@@ -307,6 +306,31 @@ class Githeat:
         # print()
         # return months
         raise NotImplementedError
+
+    def get_matrix_width(self, matrix):
+        """
+        Returns the width of the matrix with the gaps and breaks
+        :param matrix:
+        :return:
+        """
+
+        matrix_width = 0
+        if self.month_merge:
+            if self.width == BLOCK_THIN:
+                matrix_width = len(matrix) + (11 * 2)
+            elif self.width == BLOCK_REG:
+                matrix_width = len(matrix) - 11 * 2
+            elif self.width == BLOCK_THICK:
+                matrix_width = len(matrix) - 11 * 3
+        else:
+            if self.width == BLOCK_THIN:
+                matrix_width = len(matrix)
+            elif self.width == BLOCK_REG:
+                matrix_width = len(matrix) * 2
+            elif self.width == BLOCK_THICK:
+                matrix_width = len(matrix) * 3
+
+        return matrix_width
 
     def compute_graph_matrix(self):
         """
