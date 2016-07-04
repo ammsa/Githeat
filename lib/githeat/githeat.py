@@ -319,18 +319,18 @@ class Githeat:
         matrix_width = 0
         if self.month_merge:
             if self.width == BLOCK_THIN:
-                matrix_width = len(matrix) + (11 * 2)
+                matrix_width = len(matrix) + 11 * len(BLOCK_THIN)
             elif self.width == BLOCK_REG:
-                matrix_width = len(matrix) - 11 * 2
+                matrix_width = len(matrix) + 11 * len(BLOCK_REG)
             elif self.width == BLOCK_THICK:
-                matrix_width = len(matrix) - 11 * 3
+                matrix_width = len(matrix) + 11 * len(BLOCK_THICK)
         else:
             if self.width == BLOCK_THIN:
-                matrix_width = len(matrix)
+                matrix_width = len(matrix) * len(BLOCK_THIN)
             elif self.width == BLOCK_REG:
-                matrix_width = len(matrix) * 2
+                matrix_width = len(matrix) * len(BLOCK_REG)
             elif self.width == BLOCK_THICK:
-                matrix_width = len(matrix) * 3
+                matrix_width = len(matrix) * len(BLOCK_THICK)
 
         return matrix_width
 
