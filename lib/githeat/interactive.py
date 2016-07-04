@@ -421,8 +421,10 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
                 spaces,
                 term.bold(subject),
                 colorize(author, ansi=6),
-                colorize("<{}>".format(email), ansi=14)
             ]
+
+            if email:
+                value.append(colorize("<{}>".format(email), ansi=14))
 
             value = " ".join(value)
             commit_values_holder.append(value)
