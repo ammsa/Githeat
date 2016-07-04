@@ -130,7 +130,7 @@ class Githeat:
                 self.colors = COLORS_FIRE
 
         logger.start(logging_level)
-        logger.debug("initialing githeat instance")
+        logger.debug("initialing Githeat instance")
 
     def toggle_day(self, day_num):
         """

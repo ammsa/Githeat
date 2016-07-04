@@ -619,13 +619,13 @@ def main(argv=None):
                     update_most_committers_footer(location, githeat,
                                                   new_cursor_date_value, term, screen)
                 continue
-            elif inp in ONE_TO_SEVEN_KEYS or inp in Q_TO_QUOTES_KEYS:
-                if inp in ONE_TO_SEVEN_KEYS:
+            elif inp.lower() in ONE_TO_SEVEN_KEYS or inp in Q_TO_QUOTES_KEYS:
+                if inp.lower() in ONE_TO_SEVEN_KEYS:
                     #  key from 1 to 7 pressed.
                     githeat.toggle_day(int(inp) - 1)
                 else:
                     # key from q to ' pressed
-                    githeat.toggle_month(Q_TO_QUOTES_KEYS.index(inp))
+                    githeat.toggle_month(Q_TO_QUOTES_KEYS.index(inp.lower()))
 
                 # re-computing new daily contributions with the specified days/months
                 githeat.recompute_daily_contribution_map()
