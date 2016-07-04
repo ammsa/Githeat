@@ -97,6 +97,12 @@ def _cmdline(argv=None):
                         help='Separate each month',
                         default=False)
 
+    parser.add_argument('--hide-legend',
+                        dest='legend',
+                        action='store_false',
+                        help="Hide legend",
+                        default=True)
+
     parser.add_argument('--author', '-a',
                         help='Filter heatmap by author. You can also write regex here')
 
@@ -566,15 +572,16 @@ def main(argv=None):
                     graph_left_most_x, matrix, githeat)
 
         # print legend
-        block_separation_width = 4
-        legend_x = (term.width - len(githeat.colors) * block_separation_width) // 2
-        legend_y = graph_bottom_most_y + 5
-        print_graph_legend(legend_x, legend_y,
-                           githeat.width,
-                           block_separation_width,
-                           githeat.colors,
-                           screen,
-                           term)
+        if githeat.hide_legend:
+            block_separation_width = 4
+            legend_x = (term.width - len(githeat.colors) * block_separation_width) // 2
+            legend_y = graph_bottom_most_y + 5
+            print_graph_legend(legend_x, legend_y,
+                               githeat.width,
+                               block_separation_width,
+                               githeat.colors,
+                               screen,
+                               term)
 
         while True:
             cursor_color = colorize(githeat.width, ansi=15, ansi_bg=15)

@@ -86,7 +86,8 @@ class Githeat:
     def __init__(self, git_repo,
                  gtype='block', width='reg', days=[], color='grass', colors=[],
                  stat=False, stat_number=5, separate=True, month_merge=False,
-                 author=None, grep=None, config=None, logging_level="CRITICAL"
+                 legend=False, author=None, grep=None, config=None,
+                 logging_level="CRITICAL"
                  ):
         self.git_repo = git_repo
 
@@ -107,6 +108,7 @@ class Githeat:
         self.stat_number = stat_number
         self.block_separation_show = ' ' if separate else ''
         self.month_merge = month_merge
+        self.hide_legend = legend
         self.author = author
         self.grep = grep
 
