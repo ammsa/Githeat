@@ -71,6 +71,7 @@ Need help? run:
 
 
       .. code-block:: html
+
         $ githeat -h
 
         usage: githeat.py [-h] [-c FILE] [--gtype {inline,block}]
@@ -107,6 +108,42 @@ Need help? run:
           -v, --version         print version and exit
           --logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}
                                 logger level
+
+or
+
+
+      .. code-block:: html
+
+        $ githeat.interactive -h
+         usage: githeat.py [-h] [-c FILE] [--width {thick,reg,thin}]
+                  [--days DAYS [DAYS ...]] [--color {grass,fire,sky}]
+                  [--month-merge] [--hide-legend] [--author AUTHOR]
+                  [--grep GREP] [-v]
+                  [--logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}]
+         
+         githeat: Terminal Heatmap for your git repos
+
+         optional arguments:
+           -h, --help            show this help message and exit
+           -c FILE, --config FILE
+                                 Specify YAML config file
+           --width {thick,reg,thin}
+                                 Choose how wide you want the graph blocks to be
+           --days DAYS [DAYS ...]
+                                 Choose what days to show. Please enter list of day
+                                 abbreviations or full name of week
+           --color {grass,fire,sky}
+                                 Choose type of coloring you want for your graph
+           --month-merge         Separate each month
+           --hide-legend         Hide legend
+           --author AUTHOR, -a AUTHOR
+                                 Filter heatmap by author. You can also write regex
+                                 here
+           --grep GREP, -g GREP  Filter by keywords in commits
+           -v, --version         print version and exit
+           --logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}
+                                 logger level
+
 
 
 Minimum Requirements
