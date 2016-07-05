@@ -6,6 +6,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from argparse import ArgumentParser
 from argparse import ArgumentTypeError
+from argparse import RawDescriptionHelpFormatter
 from blessed import Terminal
 from dateutil.parser import parse as parse_date
 import functools
@@ -35,11 +36,23 @@ def _cmdline(argv=None):
 
     """
 
-    def _check_negative(value):
-        ivalue = int(value)
-        if ivalue < 0:
-            raise ArgumentTypeError("%s: invalid non-positive int value" % value)
-        return ivalue
+    conf_parser = ArgumentParser(
+        description=__doc__,  # printed with -h/--help
+        # Don't mess with format of description
+        formatter_class=RawDescriptionHelpFormatter,
+        # Turn off help, so we print all options in response to -h
+        add_help=False
+    )
+    conf_parser.add_argument("-c", "--config",
+                             help="Specify YAML config file",
+                             metavar="FILE")
+    args, remaining_argv = conf_parser.parse_known_args()
+    defaults = {}
+    if args.config:
+        config.load([args.config])
+    else:
+        config.load([os.path.expanduser('~/.githeat')])
+        defaults.update(config)
 
     def _is_valid_days_list(days):
         try:
@@ -57,13 +70,15 @@ def _cmdline(argv=None):
                                     "format: day abbreviation" % (days,))
 
     parser = ArgumentParser(prog="githeat.py",
-                            description='githeat: Terminal Heatmap for your git repos')
+                            description='githeat: Terminal Heatmap for your git repos',
+                            parents=[conf_parser])
+
+    parser.set_defaults(**defaults)
 
     parser.add_argument('--width',
                         action="store",
                         choices=['thick', 'reg', 'thin'],
-                        help='Choose how wide you want the graph blocks to be',
-                        default='reg')
+                        help='Choose how wide you want the graph blocks to be')
 
     parser.add_argument('--days',
                         action='store',
@@ -72,7 +87,6 @@ def _cmdline(argv=None):
                         nargs='+',
                         help="Choose what days to show. Please enter list of day "
                              "abbreviations or full name of week",
-                        default=[],
                         )
 
     parser.add_argument('--color',
@@ -83,24 +97,18 @@ def _cmdline(argv=None):
     parser.add_argument('--month-merge',
                         dest='month_merge',
                         action='store_true',
-                        help='Separate each month',
-                        default=False)
+                        help='Separate each month')
 
     parser.add_argument('--hide-legend',
                         dest='legend',
                         action='store_true',
-                        help="Hide legend",
-                        default=False)
+                        help="Hide legend")
 
     parser.add_argument('--author', '-a',
                         help='Filter heatmap by author. You can also write regex here')
 
     parser.add_argument('--grep', '-g',
                         help='Filter by keywords in commits')
-
-    parser.add_argument("-c", "--config",
-                        action="append",
-                        help="config file [etc/config.yml]")
 
     parser.add_argument("-v", "--version",
                         action="version",
@@ -114,15 +122,10 @@ def _cmdline(argv=None):
                                  'INFO', 'DEBUG', 'NOTSET'],
                         help="logger level")
 
-    args = parser.parse_args(argv)
+    args = parser.parse_args(remaining_argv)
+
     if args.days:
         args.days = _is_valid_days_list(args.days)
-
-    if not args.config:
-        # Don't specify this as an argument default or else it will always be
-        # included in the list.
-        args.config = ["etc/config.yml",
-                       os.path.expanduser('~/.githeat')]
 
     return args
 
@@ -497,12 +500,10 @@ def main(argv=None):
     args = _cmdline(argv)
     logger.start(args.logging_level)
     logger.debug("starting execution")
-    config.load(args.config)
-    config.update(**vars(args))
 
     #  get repo and initialize GitHeat instance
     g = Git(os.getcwd())
-    githeat = Githeat(g, **config)
+    githeat = Githeat(g, **vars(args))
     githeat.parse_commits()
     githeat.init_daily_contribution_map()
     githeat.compute_daily_contribution_map()

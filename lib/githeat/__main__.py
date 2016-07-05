@@ -8,6 +8,7 @@ from __future__ import print_function
 
 from argparse import ArgumentParser
 from argparse import ArgumentTypeError
+from argparse import RawDescriptionHelpFormatter
 from dateutil.parser import parse as parse_date
 from git import Git
 from git.exc import GitCommandError
@@ -31,6 +32,24 @@ def _cmdline(argv=None):
     """ Parse command line arguments.
 
     """
+    conf_parser = ArgumentParser(
+        description=__doc__,  # printed with -h/--help
+        # Don't mess with format of description
+        formatter_class=RawDescriptionHelpFormatter,
+        # Turn off help, so we print all options in response to -h
+        add_help=False
+    )
+    conf_parser.add_argument("-c", "--config",
+                             help="Specify config file",
+                             metavar="FILE")
+    args, remaining_argv = conf_parser.parse_known_args()
+    defaults = {}
+    if args.config:
+        config.load([args.config])
+    else:
+        config.load([os.path.expanduser('~/.githeat')])
+        defaults.update(config)
+
     def _check_negative(value):
         ivalue = int(value)
         if ivalue < 0:
@@ -53,7 +72,10 @@ def _cmdline(argv=None):
                                     "format: day abbreviation" % (days,))
 
     parser = ArgumentParser(prog="githeat.py",
-                            description='githeat: Terminal Heatmap for your git repos')
+                            description='githeat: Terminal Heatmap for your git repos',
+                            parents=[conf_parser])
+
+    parser.set_defaults(**defaults)
 
     parser.add_argument('--gtype',
                         action="store",
@@ -111,10 +133,6 @@ def _cmdline(argv=None):
     parser.add_argument('--grep', '-g',
                         help='Filter by keywords in commits')
 
-    parser.add_argument("-c", "--config",
-                        action="append",
-                        help="config file [etc/config.yml]")
-
     parser.add_argument("-v", "--version",
                         action="version",
                         version="githeat {:s}".format(__version__),
@@ -127,15 +145,11 @@ def _cmdline(argv=None):
                                  'INFO', 'DEBUG', 'NOTSET'],
                         help="logger level")
 
-    args = parser.parse_args(argv)
+    args = parser.parse_args(remaining_argv)
 
     if args.days:
         args.days = _is_valid_days_list(args.days)
 
-    if not args.config:
-        # Don't specify this as an argument default or else it will always be
-        # included in the list.
-        args.config = ["etc/config.yml"]
     return args
 
 
@@ -148,7 +162,6 @@ def main(argv=None):
     args = _cmdline(argv)
     logger.start(args.logging_level)
     logger.info("executing githeat")
-    config.load(args.config)
 
     try:
         g = Git(os.getcwd())
