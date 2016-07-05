@@ -122,7 +122,7 @@ def _cmdline(argv=None):
                                  'INFO', 'DEBUG', 'NOTSET'],
                         help="logger level")
 
-    args = parser.parse_args(remaining_argv)
+    args = parser.parse_args(argv)
 
     if args.days:
         args.days = _is_valid_days_list(args.days)
@@ -514,7 +514,8 @@ def main(argv=None):
     matrix_width = githeat.get_matrix_width(matrix)
     if matrix_width > term.width:
         print("Your terminal width is smaller than the heatmap. Please consider using "
-              "the --width {thin, reg, thick} argument or resize your terminal.")
+              "the --width {thin, reg, thick} argument, resizing your terminal, or "
+              "merging months by including --month-merge.")
         return 0
     new_width = (term.width - matrix_width) // 2
     csr = Cursor(term.height // 2 - 3, new_width, term)

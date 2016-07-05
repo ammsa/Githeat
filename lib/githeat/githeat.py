@@ -469,8 +469,8 @@ class Githeat:
             matrix_width = self.get_matrix_width(matrix)
             if matrix_width > int(width):
                 print("Your terminal width is smaller than the heatmap. Please "
-                      "consider using the --width {thin, reg, thick} argument or "
-                      "resize your terminal.")
+                      "consider using the --width {thin, reg, thick},  resizing your "
+                      "terminal, or merging months by including --month-merge")
                 return
             self.print_graph(matrix)
 

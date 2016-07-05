@@ -145,7 +145,7 @@ def _cmdline(argv=None):
                                  'INFO', 'DEBUG', 'NOTSET'],
                         help="logger level")
 
-    args = parser.parse_args(remaining_argv)
+    args = parser.parse_args(argv)
 
     if args.days:
         args.days = _is_valid_days_list(args.days)
