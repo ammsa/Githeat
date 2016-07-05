@@ -17,6 +17,7 @@ import blessed
 import pytest
 from githeat import interactive
 from xtermcolor import colorize
+from argparse import ArgumentTypeError
 
 TEST_TERMINAL = functools.partial(blessed.Terminal, kind='xterm-256color')
 
@@ -144,6 +145,53 @@ def test_print_graph_legend(patch_terminal_size):
                   (0, 4): block_width,
                   (0, 0): block_width}
         assert screen == result
+
+# usage: githeat.py [-h] [--width {thick,reg,thin}] [--days DAYS [DAYS ...]]
+#                   [--color {grass,fire,sky}] [--stat-number STAT_NUMBER]
+#                   [--stat] [--month-merge] [--hide-legend] [--author AUTHOR]
+#                   [--grep GREP] [-c CONFIG] [-v]
+#                   [--logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}]
+def test__cmdline():
+    argv = "--width reg --days sun Mon Fri Sat Friday --color sky --month-merge".split()
+    assert interactive._cmdline(argv).width == "reg"
+    assert interactive._cmdline(argv).days == ['Sunday', 'Friday', 'Saturday', 'Monday']
+    assert interactive._cmdline(argv).color == 'sky'
+
+
+def test__cmdline_invalid_days():
+    argv = "--days blahday tuesday ".split()
+    with pytest.raises(ArgumentTypeError):
+        interactive._cmdline(argv)
+
+
+def test_is_within_boundary_valid():
+    t = interactive.is_within_boundary(100, 0, 0, 100, interactive.Cursor(4, 5, None))
+    assert t is True
+
+
+def test_is_within_boundary_invalid():
+    t = interactive.is_within_boundary(100, 0, 0, 100, interactive.Cursor(200, 200, None))
+    assert t is False
+    t = interactive.is_within_boundary(100, 10, 0, 100, interactive.Cursor(5, 55, None))
+    assert t is False
+    t = interactive.is_within_boundary(100, 0, 10, 100, interactive.Cursor(55, 5, None))
+    assert t is False
+    t = interactive.is_within_boundary(100, 0, 0, 100, interactive.Cursor(55, 200, None))
+    assert t is False
+
+
+def test_resize_until_fit():
+    texts = ["hello", "there, ", "this is a loooooooooooooooooooooooooooooong text"]
+    new_texts = interactive.resize_until_fit(texts, 40)
+    assert new_texts == ['hello', 'there, ', 'this is a looooooooooooooooo']
+
+    texts = ["hello", "loooooooong looong", "loooooooooooooooooooooooooooooong text"]
+    new_texts = interactive.resize_until_fit(texts, 10)
+    assert new_texts == ['hello', 'loooo', '']
+
+    texts = ["hello", "there, ", "this text fits"]
+    new_texts = interactive.resize_until_fit(texts, 60)
+    assert new_texts == texts
 
 
 # Make the script executable.

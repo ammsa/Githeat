@@ -136,8 +136,9 @@ class Githeat:
         """
         Toggles a day to be shown and updates self.days
         """
-        self.days_toggle[day_num] = not self.days_toggle[day_num]  # toggle day
-        self.days = [d for idx, d in enumerate(DAYS) if self.days_toggle[idx]]
+        if 0 <= day_num <= 6:
+            self.days_toggle[day_num] = not self.days_toggle[day_num]  # toggle day
+            self.days = [d for idx, d in enumerate(DAYS) if self.days_toggle[idx]]
 
     def toggle_month(self, num):
         """
@@ -174,7 +175,6 @@ class Githeat:
             git_log_args.append("--grep={}".format(self.grep))
 
         last_year_log_dates = self.git_repo.log(git_log_args)
-
         raw_commits = last_year_log_dates.replace("'", '').split("\n")
         self.commits_db = {}  # holds commits by date as key
 

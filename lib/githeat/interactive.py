@@ -38,7 +38,7 @@ def _cmdline(argv=None):
     def _check_negative(value):
         ivalue = int(value)
         if ivalue < 0:
-            raise ArgumentTypeError("%s: invalid positive int value" % value)
+            raise ArgumentTypeError("%s: invalid non-positive int value" % value)
         return ivalue
 
     def _is_valid_days_list(days):
@@ -641,8 +641,8 @@ def main(argv=None):
 
             # only allow moves within the graph boundaries
             if not is_within_boundary(graph_right_most_x, graph_top_most_y,
-                                      graph_left_most_x, graph_bottom_most_y,
-                                      n_csr):
+                                  graph_left_most_x, graph_bottom_most_y,
+                                  n_csr):
                 continue
 
             # get value at new cursor block, if it exists

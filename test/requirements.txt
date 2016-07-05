@@ -3,4 +3,5 @@
 ##    pip install --requirement=requirements.txt
 ##
 pytest>=2.9
+pytest-cov
 mock
