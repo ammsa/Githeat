@@ -80,17 +80,6 @@ def _cmdline(argv=None):
                         help='Choose type of coloring you want for your graph',
                         default='grass')
 
-    parser.add_argument('--stat-number',
-                        dest='stat_number',
-                        type=_check_negative,
-                        help='Number of top committers to show in stat')
-
-    parser.add_argument('--stat', '-s',
-                        dest='stat',
-                        action='store_true',
-                        help='Show commits stat',
-                        default=False)
-
     parser.add_argument('--month-merge',
                         dest='month_merge',
                         action='store_true',
@@ -117,13 +106,6 @@ def _cmdline(argv=None):
                         action="version",
                         version="githeat {:s}".format(__version__),
                         help="print version and exit")
-
-    parser.add_argument("--logging",
-                        dest="logging_level",
-                        default="CRITICAL",
-                        choices=['CRITICAL', 'ERROR', 'WARNING',
-                                 'INFO', 'DEBUG', 'NOTSET'],
-                        help="logger level")
 
     args = parser.parse_args(argv)
     if args.days:

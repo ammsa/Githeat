@@ -36,7 +36,24 @@ _CONFIG = {
                             "githeat.interactive = githeat.interactive:main",
                             ],
     },
+    "install_requires": [
+        "blessed",
+        "gitdb",
+        "githeat",
+        "GitPython",
+        "py",
+        "pytest",
+        "python-dateutil",
+        "pytz",
+        "PyYAML",
+        "six",
+        "smmap",
+        "wcwidth",
+        "wheel",
+        "xtermcolor",
+    ],
     "data_files": list(chain.from_iterable(_listdir(root) for root in _DATA))
+
 }
 
 

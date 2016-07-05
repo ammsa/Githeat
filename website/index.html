@@ -70,39 +70,10 @@
 
                 <li class="navbar-item"><a class="navbar-link" href="#configuration">Configuration</a>
 
-                </li>
-                <li class="navbar-item">
-                    <a class="navbar-link" href="#"
-                       data-popover="#moreNavPopover">More</a>
-                    <div id="moreNavPopover" class="popover">
-                        <ul class="popover-list">
-                            <li class="popover-item">
-                                <a class="popover-link"
-                                   href="https://github.com/dhg/Skeleton">On Github</a>
-                            </li>
-                            <li class="popover-item">
-                                <a class="popover-link"
-                                   href="https://github.com/dhg/Skeleton#browser-support">Browsers</a>
-                            </li>
-                            <li class="popover-item">
-                                <a class="popover-link"
-                                   href="https://github.com/dhg/Skeleton#license">License</a>
-                            </li>
-                            <li class="popover-item">
-                                <a class="popover-link"
-                                   href="https://github.com/dhg/Skeleton#extensions">Extensions</a>
-                            </li>
-                            <li class="popover-item">
-                                <a class="popover-link"
-                                   href="https://github.com/dhg/Skeleton/releases">Versions</a>
-                            </li>
-                            <li class="popover-item">
-                                <a class="popover-link"
-                                   href="https://github.com/dhg/Skeleton#colophon">Colophon</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
+                <li class="navbar-item"><a class="navbar-link" href="#license">License</a>
+
+                <li class="navbar-item"><a class="navbar-link" href="https://github.com/AmmsA/Githeat">More</a>
+
             </ul>
         </div>
     </nav>
@@ -169,64 +140,33 @@
 
     <div class="docs-section" id="install">
         <h6 class="docs-header">Installation</h6>
-        <p>installation here</p>
+        <p>
+            Install using pip:
+            <pre><code>$ pip install githeat</code></pre>
+            Or for the most up-to-date version, manual installation via <code>setup.py</code>.</p>
+            <p>
+            Install for the current user:
+            <pre><code>$ python setup.py install --user</code></pre>
+
+            Install on your machine:
+            <pre><code>$ python setup.py install</code></pre>
+
+            Run the application:
+            <pre><code>$ python -m githeat --help</code></pre>
+
+            Run the test suite:
+            <pre><code>$ py.test test/</code></pre>
+        </p>
     </div>
 
     <div class="docs-section" id="examples">
         <h6 class="docs-header">Examples</h6>
-        <h6 class="docs-header">CLI Examples</h6>
-        <p>Want to quickly display the heatmap?, just <code>cd</code> to your project root
-            (where .git is stored) and run:
-        <pre><code>githeat</code></pre>
-        <img src="static/images/githeat_cli.png">
-        </p>
-
-        <p>Want to merge in the months? run:
-        <pre><code>githeat --month-merge</code></pre>
-        </p>
-
-        <p>Want to separate each day block? run:
-        <pre><code>githeat --separate</code></pre>
-        </p>
-
-        <p>Want to change the width of each block? choose between <code>thin, reg,
-            thick</code>:
-        <pre><code>githeat --width {thick,reg,thin}</code></pre>
-        </p>
-
-        <p>Want to change the color of the graph? choose between <code>grass, sky,
-            fire</code>:
-        <pre><code>githeat --color {grass,fire,sky}</code></pre>
-        </p>
-
-        <p>Want to show who are the top 10 most committers? run and it will parse the days
-            for you:
-        <pre><code>githeat --stat --stat-number 10</code></pre>
-        </p>
-
-        <p>Want to filter out commits by author? write regex in the author argument:
-        <pre><code>githeat --author="Will|Bill|"</code></pre>
-        </p>
-
-        <p>Want to filter out commits by keywords in commit? write regex in the grep
-            argument:
-        <pre><code>githeat --grep="Fix"</code></pre>
-        </p>
-
-        <p>Have a specific YAML configuration file you want to use? pass it to the config
-            argument:
-        <pre><code>githeat --config PATH_TO_CONFIG.yaml</code></pre>
-        </p>
-
-        <p>Need help? run:
-        <pre><code>githeat -h</code></pre>
-        </p>
-
 
         <h6 class="docs-header">Interactive Examples</h6>
         <p>Want to navigate through map and interact with it? <code>cd</code> to your
             repo's root and run:
-        <pre><code>githeat.interactive</code></pre>
+        <pre><code>$ githeat.interactive</code></pre>
+        <img src="static/images/githeat_interactive.png">
         Use the arrows on your keyboard to navigate to a specific day. Press
         <code>enter</code> on a specific day to show the commits on that day. Press any
         key from <code>1</code> to <code>7</code> to show specific days. Press any key
@@ -236,13 +176,138 @@
 
 
         <p>Need help? run:
-        <pre><code>githeat.interactive -h</code></pre>
+<pre><code>$ githeat.interactive -h
+usage: githeat.py [-h] [--width {thick,reg,thin}] [--days DAYS [DAYS ...]]
+                  [--color {grass,fire,sky}] [--month-merge] [--hide-legend]
+                  [--author AUTHOR] [--grep GREP] [-c CONFIG] [-v]
+
+githeat: Terminal Heatmap for your git repos
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --width {thick,reg,thin}
+                        Choose how wide you want the graph blocks to be
+  --days DAYS [DAYS ...]
+                        Choose what days to show. Please enter list of day
+                        abbreviations or full name of week
+  --color {grass,fire,sky}
+                        Choose type of coloring you want for your graph
+  --month-merge         Separate each month
+  --hide-legend         Hide legend
+  --author AUTHOR, -a AUTHOR
+                        Filter heatmap by author. You can also write regex
+                        here
+  --grep GREP, -g GREP  Filter by keywords in commits
+  -c CONFIG, --config CONFIG
+                        config file [etc/config.yml]
+  -v, --version         print version and exit
+                        logger level</code></pre>
+        </p>
+
+        <h6 class="docs-header">CLI Examples</h6>
+        <p>Want to quickly display the heatmap? just <code>cd</code> to your project root
+            (where .git is stored) and run:
+        <pre><code>$ githeat</code></pre>
+        <img src="static/images/githeat_cli.png">
+        </p>
+
+        <p>Want to merge in the months? run:
+        <pre><code>$ githeat --month-merge</code></pre>
+        <img src="static/images/githeat_cli_month_merge.png">
+        </p>
+
+        <p>Want to separate each day block? run:
+        <pre><code>$ githeat --separate</code></pre>
+        <img src="static/images/githeat_cli_separate.png">
+        </p>
+
+        <p>Want to change the width of each block? choose between <code>thin, reg,
+            thick</code>:
+        <pre><code>$ githeat --width {thick,reg,thin}</code></pre>
+        <img src="static/images/githeat_cli_width_thin.png">
+        </p>
+
+        <p>Want to change the color of the graph? choose between <code>grass, sky,
+            fire</code>:
+        <pre><code>$ githeat --color {grass,fire,sky}</code></pre>
+        <img src="static/images/githeat_cli_color_fire.png">
+        </p>
+
+        <p>Want to show who are the top 10 most committers? run and it will parse the days
+            for you:
+        <pre><code>$ githeat --stat --stat-number 10</code></pre>
+        <img src="static/images/githeat_cli_stat_stat_number_10.png">
+        </p>
+
+        <p>Want to filter out commits by author? write regex in the author argument:
+        <pre><code>$ githeat --author="Will|Bill|"</code></pre>
+        </p>
+
+        <p>Want to filter out commits by keywords in commit? write regex in the grep
+            argument:
+        <pre><code>$ githeat --grep="Fix"</code></pre>
+        </p>
+
+        <p>Have a specific YAML configuration file you want to use? pass it to the config
+            argument:
+        <pre><code>$ githeat --config PATH_TO_CONFIG.yaml</code></pre>
+        </p>
+
+        <p>Need help? run:
+<pre><code>$ githeat -h
+usage: githeat.py [-h] [--gtype {inline,block}] [--width {thick,reg,thin}]
+                  [--days DAYS [DAYS ...]] [--color {grass,fire,sky}]
+                  [--stat-number STAT_NUMBER] [--stat] [--separate]
+                  [--month-merge] [--author AUTHOR] [--grep GREP] [-c CONFIG]
+                  [-v] [--logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}]
+
+githeat: Terminal Heatmap for your git repos
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --gtype {inline,block}
+                        Choose how you want the graph to be displayed
+  --width {thick,reg,thin}
+                        Choose how wide you want the graph blocks to be
+  --days DAYS [DAYS ...]
+                        Choose what days to show. Please enter list of day
+                        abbreviations or full name of week
+  --color {grass,fire,sky}
+                        Choose type of coloring you want for your graph
+  --stat-number STAT_NUMBER
+                        Number of top committers to show in stat
+  --stat, -s            Show commits stat
+  --separate, -b        Separate each day
+  --month-merge         Separate each month
+  --author AUTHOR, -a AUTHOR
+                        Filter heatmap by author. You can also write regex
+                        here
+  --grep GREP, -g GREP  Filter by keywords in commits
+  -c CONFIG, --config CONFIG
+                        config file [etc/config.yml]
+  -v, --version         print version and exit
+  --logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}
+                        logger level
+</code></pre>
         </p>
     </div>
 
     <div class="docs-section" id="configuration">
         <h6 class="docs-header">Configuration</h6>
-        <p>Configuration here</p>
+        <p>Want to change default arguments? create a <code>.githeat</code> dotfile in yaml format in your home directory</p>
+        <p>You can also change the colors setting. Each list in the colors list is a different coloring scheme with ansi values. Change to colors to your liking.</p>
+        <pre><code>
+colors: [
+   [0, 22, 28, 34, 40, 46],
+   [0, 24, 31, 38, 45, 51],
+   [0, 220, 214, 208, 202, 196]
+ ]
+width: "reg"
+month_merge: false
+separate: true
+author: ""
+grep: ""
+        </code></pre>
     </div>
 
     <div class="docs-section" id="roadmap">
@@ -261,6 +326,31 @@
     <div class="docs-section" id="issues">
         <h6 class="docs-header">issues</h6>
         <p>Found a bug? Please report it in GitHub.</p>
+    </div>
+
+    <div class="docs-section" id="license">
+        <h6 class="docs-header">license</h6>
+        <p>The MIT License (MIT)</p>
+
+        <p>Copyright (c) 2016-2017 Mustafa Abualsaud</p>
+
+        <p>Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:</p>
+
+        <p>The above copyright notice and this permission notice shall be included in
+        all copies or substantial portions of the Software.</p>
+
+        <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+        THE SOFTWARE.</p>
     </div>
 </div>
 
