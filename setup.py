@@ -22,8 +22,6 @@ def _listdir(root):
     return
 
 
-_DATA = "etc/",
-
 _CONFIG = {
     "name": "githeat",
     "author": "Mustafa Abualsaud",
@@ -52,7 +50,6 @@ _CONFIG = {
         "wheel",
         "xtermcolor",
     ],
-    "data_files": list(chain.from_iterable(_listdir(root) for root in _DATA)),
     "tests_require": [
         "pytest>=2.9"
         "pytest-cov"
