@@ -12,6 +12,17 @@ showing you what days are most popular, and what months are most active.
 
 |video|
 
+You can also skip the interactive part and print the heatmap directly.
+
+.. code-block::
+   :linenos:
+
+   $ githeat
+
+
+|githeat_cli|
+
+
 Minimum Requirements
 ====================
 
@@ -83,3 +94,4 @@ Deploy the application in a self-contained `Virtualenv`_ environment:
    :target: https://github.com/ammsa/Githeat
 .. |video| image:: https://asciinema.org/a/812lm3uzd9yk8dbe0aehj5jvj.png
    :target: https://asciinema.org/a/812lm3uzd9yk8dbe0aehj5jvj
+.. |githeat_cli| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli.png?token=AAtq7w4e7O2ttQRmDsdX-7u1zRzv5q3Pks5XhWZIwA%3D%3D
