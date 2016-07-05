@@ -107,6 +107,13 @@ def _cmdline(argv=None):
                         version="githeat {:s}".format(__version__),
                         help="print version and exit")
 
+    parser.add_argument("--logging",
+                        dest="logging_level",
+                        default="CRITICAL",
+                        choices=['CRITICAL', 'ERROR', 'WARNING',
+                                 'INFO', 'DEBUG', 'NOTSET'],
+                        help="logger level")
+
     args = parser.parse_args(argv)
     if args.days:
         args.days = _is_valid_days_list(args.days)

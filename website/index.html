@@ -62,17 +62,20 @@
             <ul class="navbar-list">
                 <li class="navbar-item"><a class="navbar-link" href="#intro">Intro</a>
                 </li>
-                <li class="navbar-item"><a class="navbar-link" href="#how">How it works</a>
+                <li class="navbar-item"><a class="navbar-link" href="#how">How it
+                    works</a>
 
                 <li class="navbar-item"><a class="navbar-link" href="#install">Install</a>
 
-                <li class="navbar-item"><a class="navbar-link" href="#examples">Examples</a>
+                <li class="navbar-item"><a class="navbar-link"
+                                           href="#examples">Examples</a>
 
                 <li class="navbar-item"><a class="navbar-link" href="#configuration">Configuration</a>
 
                 <li class="navbar-item"><a class="navbar-link" href="#license">License</a>
 
-                <li class="navbar-item"><a class="navbar-link" href="https://github.com/AmmsA/Githeat">More</a>
+                <li class="navbar-item"><a class="navbar-link"
+                                           href="https://github.com/AmmsA/Githeat">More</a>
 
             </ul>
         </div>
@@ -127,14 +130,17 @@
             Everything it needs is read directly from a local database on a hidden .git
             directory under your project root directory. In your terminal, you can try out
             running <code>git log</code> and you will see all the commits you and other
-            contributors have made to the repository. It nice, but let us visualize it.</p>
+            contributors have made to the repository. It nice, but let us visualize it.
+        </p>
         <p>Now most of us are familiar with the heatmaps GitHub displays in every profile,
             right? Pretty cool feature. It shows you how active is a user, how many
             commits the pushes on a certain day or month, etc.
-            Githeat allows you to interact and visualize a heatmap, not for a specific user,
+            Githeat allows you to interact and visualize a heatmap, not for a specific
+            user,
             but for a specific repo. It will show you how many commits have been committed
             on each day during the past year, who are the top committers on a
-            single day, what days are most active, and so on. Githeat does all of this offline
+            single day, what days are most active, and so on. Githeat does all of this
+            offline
             and in your terminal, using just your git local database.</p>
     </div>
 
@@ -142,20 +148,21 @@
         <h6 class="docs-header">Installation</h6>
         <p>
             Install using pip:
-            <pre><code>$ pip install githeat</code></pre>
-            Or for the most up-to-date version, manual installation via <code>setup.py</code>.</p>
-            <p>
+        <pre><code>$ pip install githeat</code></pre>
+        Or for the most up-to-date version, manual installation via
+        <code>setup.py</code>.</p>
+        <p>
             Install for the current user:
-            <pre><code>$ python setup.py install --user</code></pre>
+        <pre><code>$ python setup.py install --user</code></pre>
 
-            Install on your machine:
-            <pre><code>$ python setup.py install</code></pre>
+        Install on your machine:
+        <pre><code>$ python setup.py install</code></pre>
 
-            Run the application:
-            <pre><code>$ python -m githeat --help</code></pre>
+        Run the application:
+        <pre><code>$ python -m githeat --help</code></pre>
 
-            Run the test suite:
-            <pre><code>$ py.test test/</code></pre>
+        Run the test suite:
+        <pre><code>$ py.test test/</code></pre>
         </p>
     </div>
 
@@ -177,31 +184,31 @@
 
         <p>Need help? run:
 <pre><code>$ githeat.interactive -h
-usage: githeat.py [-h] [--width {thick,reg,thin}] [--days DAYS [DAYS ...]]
-                  [--color {grass,fire,sky}] [--month-merge] [--hide-legend]
-                  [--author AUTHOR] [--grep GREP] [-c CONFIG] [-v]
+    usage: githeat.py [-h] [--width {thick,reg,thin}] [--days DAYS [DAYS ...]]
+    [--color {grass,fire,sky}] [--month-merge] [--hide-legend]
+    [--author AUTHOR] [--grep GREP] [-c CONFIG] [-v]
 
-githeat: Terminal Heatmap for your git repos
+    githeat: Terminal Heatmap for your git repos
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --width {thick,reg,thin}
-                        Choose how wide you want the graph blocks to be
-  --days DAYS [DAYS ...]
-                        Choose what days to show. Please enter list of day
-                        abbreviations or full name of week
-  --color {grass,fire,sky}
-                        Choose type of coloring you want for your graph
-  --month-merge         Separate each month
-  --hide-legend         Hide legend
-  --author AUTHOR, -a AUTHOR
-                        Filter heatmap by author. You can also write regex
-                        here
-  --grep GREP, -g GREP  Filter by keywords in commits
-  -c CONFIG, --config CONFIG
-                        config file [etc/config.yml]
-  -v, --version         print version and exit
-                        logger level</code></pre>
+    optional arguments:
+    -h, --help show this help message and exit
+    --width {thick,reg,thin}
+    Choose how wide you want the graph blocks to be
+    --days DAYS [DAYS ...]
+    Choose what days to show. Please enter list of day
+    abbreviations or full name of week
+    --color {grass,fire,sky}
+    Choose type of coloring you want for your graph
+    --month-merge Separate each month
+    --hide-legend Hide legend
+    --author AUTHOR, -a AUTHOR
+    Filter heatmap by author. You can also write regex
+    here
+    --grep GREP, -g GREP Filter by keywords in commits
+    -c CONFIG, --config CONFIG
+    config file [etc/config.yml]
+    -v, --version print version and exit
+    logger level</code></pre>
         </p>
 
         <h6 class="docs-header">CLI Examples</h6>
@@ -255,59 +262,63 @@ optional arguments:
 
         <p>Need help? run:
 <pre><code>$ githeat -h
-usage: githeat.py [-h] [--gtype {inline,block}] [--width {thick,reg,thin}]
-                  [--days DAYS [DAYS ...]] [--color {grass,fire,sky}]
-                  [--stat-number STAT_NUMBER] [--stat] [--separate]
-                  [--month-merge] [--author AUTHOR] [--grep GREP] [-c CONFIG]
-                  [-v] [--logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}]
+    usage: githeat.py [-h] [--gtype {inline,block}] [--width {thick,reg,thin}]
+    [--days DAYS [DAYS ...]] [--color {grass,fire,sky}]
+    [--stat-number STAT_NUMBER] [--stat] [--separate]
+    [--month-merge] [--author AUTHOR] [--grep GREP] [-c CONFIG]
+    [-v] [--logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}]
 
-githeat: Terminal Heatmap for your git repos
+    githeat: Terminal Heatmap for your git repos
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --gtype {inline,block}
-                        Choose how you want the graph to be displayed
-  --width {thick,reg,thin}
-                        Choose how wide you want the graph blocks to be
-  --days DAYS [DAYS ...]
-                        Choose what days to show. Please enter list of day
-                        abbreviations or full name of week
-  --color {grass,fire,sky}
-                        Choose type of coloring you want for your graph
-  --stat-number STAT_NUMBER
-                        Number of top committers to show in stat
-  --stat, -s            Show commits stat
-  --separate, -b        Separate each day
-  --month-merge         Separate each month
-  --author AUTHOR, -a AUTHOR
-                        Filter heatmap by author. You can also write regex
-                        here
-  --grep GREP, -g GREP  Filter by keywords in commits
-  -c CONFIG, --config CONFIG
-                        config file [etc/config.yml]
-  -v, --version         print version and exit
-  --logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}
-                        logger level
+    optional arguments:
+    -h, --help show this help message and exit
+    --gtype {inline,block}
+    Choose how you want the graph to be displayed
+    --width {thick,reg,thin}
+    Choose how wide you want the graph blocks to be
+    --days DAYS [DAYS ...]
+    Choose what days to show. Please enter list of day
+    abbreviations or full name of week
+    --color {grass,fire,sky}
+    Choose type of coloring you want for your graph
+    --stat-number STAT_NUMBER
+    Number of top committers to show in stat
+    --stat, -s Show commits stat
+    --separate, -b Separate each day
+    --month-merge Separate each month
+    --author AUTHOR, -a AUTHOR
+    Filter heatmap by author. You can also write regex
+    here
+    --grep GREP, -g GREP Filter by keywords in commits
+    -c CONFIG, --config CONFIG
+    config file [etc/config.yml]
+    -v, --version print version and exit
+    --logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}
+    logger level
 </code></pre>
         </p>
     </div>
 
     <div class="docs-section" id="configuration">
         <h6 class="docs-header">Configuration</h6>
-        <p>Want to change default arguments? create a <code>.githeat</code> dotfile in yaml format in your home directory</p>
-        <p>You can also change the colors setting. Each list in the colors list is a different coloring scheme with ansi values. Change to colors to your liking.</p>
-        <pre><code>
-colors: [
-   [0, 22, 28, 34, 40, 46],
-   [0, 24, 31, 38, 45, 51],
-   [0, 220, 214, 208, 202, 196]
- ]
+        <p>Want to change default arguments? create a <code>.githeat</code> dotfile in
+            yaml format in your home directory or pass it's path as an argument to
+            <code>--config</code>
+        </p>
+        <p>You can also change the colors setting. Each list in the colors list is a
+            different coloring scheme with ansi values. Change to colors to your
+            liking.</p>
+<pre><code>colors: [
+    [0, 22, 28, 34, 40, 46],
+    [0, 24, 31, 38, 45, 51],
+    [0, 220, 214, 208, 202, 196]
+    ]
 width: "reg"
 month_merge: false
 separate: true
 author: ""
 grep: ""
-        </code></pre>
+</code></pre>
     </div>
 
     <div class="docs-section" id="roadmap">
@@ -335,22 +346,22 @@ grep: ""
         <p>Copyright (c) 2016-2017 Mustafa Abualsaud</p>
 
         <p>Permission is hereby granted, free of charge, to any person obtaining a copy
-        of this software and associated documentation files (the "Software"), to deal
-        in the Software without restriction, including without limitation the rights
-        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-        copies of the Software, and to permit persons to whom the Software is
-        furnished to do so, subject to the following conditions:</p>
+            of this software and associated documentation files (the "Software"), to deal
+            in the Software without restriction, including without limitation the rights
+            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+            copies of the Software, and to permit persons to whom the Software is
+            furnished to do so, subject to the following conditions:</p>
 
         <p>The above copyright notice and this permission notice shall be included in
-        all copies or substantial portions of the Software.</p>
+            all copies or substantial portions of the Software.</p>
 
         <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-        THE SOFTWARE.</p>
+            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+            THE SOFTWARE.</p>
     </div>
 </div>
 
