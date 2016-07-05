@@ -69,9 +69,9 @@ Have a specific YAML configuration file you want to use? pass it to the config a
 
 Need help? run:
 
-        $ githeat -h
 
       .. code-block:: html
+        $ githeat -h
 
         usage: githeat.py [-h] [-c FILE] [--gtype {inline,block}]
                          [--width {thick,reg,thin}] [--days DAYS [DAYS ...]]

@@ -28,9 +28,11 @@ _CONFIG = {
     "name": "githeat",
     "author": "Mustafa Abualsaud",
     "author_email": "mabualsaud@outlook.com",
-    "url": "",
+    "url": "https://github.com/AmmsA/Githeat",
+    "description": "Interactive heatmap for your git repos",
     "package_dir": {"": "lib"},
     "packages": find_packages("lib"),
+    "license": "MIT License",
     "entry_points": {
         "console_scripts": ["githeat = githeat:main",
                             "githeat.interactive = githeat.interactive:main",
