@@ -40,7 +40,7 @@ def _cmdline(argv=None):
         add_help=False
     )
     conf_parser.add_argument("-c", "--config",
-                             help="Specify config file",
+                             help="Specify YAML config file",
                              metavar="FILE")
     args, remaining_argv = conf_parser.parse_known_args()
     defaults = {}

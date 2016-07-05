@@ -6,6 +6,9 @@
 Welcome to githeat's documentation!
 =======================================
 
+Documentation is complete yet, please visit the projects website for more
+information on how to use
+
 Contents:
 
 .. toctree::

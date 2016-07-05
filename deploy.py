@@ -13,7 +13,7 @@ from contextlib import contextmanager
 from os import chdir
 from os import getcwd
 from os.path import abspath
-from os.path imort isdir
+from os.path import isdir
 from os.path import join
 from shlex import split
 from shutil import rmtree

@@ -10,6 +10,7 @@ dist/
 
 # py.test
 
+htmlcov/
 .cache/
 
 
@@ -41,3 +42,8 @@ nbproject/
 # OS-specific
 
 .DS_Store
+
+
+# Project specific
+
+etc/
