@@ -10,6 +10,8 @@ problems. GitHeat will local machine to parse the git-log of your repo and
 allow you to navigate through an interactive heatmap in your own terminal,
 showing you what days are most popular, and what months are most active.
 
+|video|
+
 Minimum Requirements
 ====================
 
@@ -28,6 +30,14 @@ Optional Requirements
 
 Basic Setup
 ===========
+
+Install using pip:
+
+..  code-block::
+
+    $ pip install githeat
+
+
 
 Install for the current user:
 
@@ -71,3 +81,5 @@ Deploy the application in a self-contained `Virtualenv`_ environment:
    :width: 100px
    :alt: githeat
    :target: https://github.com/ammsa/Githeat
+.. |video| image:: https://asciinema.org/a/812lm3uzd9yk8dbe0aehj5jvj.png
+   :target: https://asciinema.org/a/812lm3uzd9yk8dbe0aehj5jvj
