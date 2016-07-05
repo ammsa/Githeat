@@ -9,6 +9,7 @@ from collections import Counter, defaultdict
 from dateutil.parser import parse as parse_date
 from dateutil.relativedelta import relativedelta
 from itertools import cycle
+import os
 from xtermcolor import colorize
 
 from .core import logger
@@ -464,6 +465,13 @@ class Githeat:
             self.print_inline()
         else:
             matrix = self.compute_graph_matrix()
+            _, width = os.popen('stty size', 'r').read().split()
+            matrix_width = self.get_matrix_width(matrix)
+            if matrix_width > int(width):
+                print("Your terminal width is smaller than the heatmap. Please "
+                      "consider using the --width {thin, reg, thick} argument or "
+                      "resize your terminal.")
+                return
             self.print_graph(matrix)
 
         if self.stat:
