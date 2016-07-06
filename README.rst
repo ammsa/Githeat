@@ -69,7 +69,6 @@ Have a specific YAML configuration file you want to use? pass it to the config a
 
 Need help? run:
 
-
       .. code-block:: html
 
         $ githeat -h
@@ -109,8 +108,7 @@ Need help? run:
           --logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}
                                 logger level
 
-or
-
+or for the interactive help
 
       .. code-block:: html
 
@@ -120,7 +118,7 @@ or
                   [--month-merge] [--hide-legend] [--author AUTHOR]
                   [--grep GREP] [-v]
                   [--logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}]
-         
+
          githeat: Terminal Heatmap for your git repos
 
          optional arguments:
