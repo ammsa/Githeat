@@ -1,5 +1,0 @@
-## Python requirements for building documentation.
-##
-##     pip install --requirement=requirements.txt
-##
-Sphinx>=1.3
