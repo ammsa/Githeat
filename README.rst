@@ -10,9 +10,13 @@ problems. GitHeat will local machine to parse the git-log of your repo and
 allow you to navigate through an interactive heatmap in your own terminal,
 showing you what days are most popular, and what months are most active.
 
+To start the interactive heatmap, run:
+
+        $ githeat.interactive
+
 |video|
 
-You can also skip the interactive part and print the heatmap directly.
+or skip the interactive part and print the heatmap directly by running: 
 
         $ githeat
 
