@@ -689,7 +689,7 @@ def main(argv=None):
                     # redraw base terminal after exiting commits desc terminal
                     redraw(term=term, screen=screen)
                 else:
-                    info = u'Please choose a date with contributions'
+                    info = u'Please choose a date with contributions \a'
                     text = unicode(new_cursor_date_value) + ' ' + info
                     print_footer_left(term, text, screen)
 
