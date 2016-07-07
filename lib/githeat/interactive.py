@@ -91,8 +91,7 @@ def _cmdline(argv=None):
 
     parser.add_argument('--color',
                         choices=['grass', 'fire', 'sky'],
-                        help='Choose type of coloring you want for your graph',
-                        default='grass')
+                        help='Choose type of coloring you want for your graph')
 
     parser.add_argument('--month-merge',
                         dest='month_merge',

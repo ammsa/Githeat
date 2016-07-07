@@ -80,14 +80,12 @@ def _cmdline(argv=None):
     parser.add_argument('--gtype',
                         action="store",
                         choices=['inline', 'block'],
-                        help='Choose how you want the graph to be displayed',
-                        default='block')
+                        help='Choose how you want the graph to be displayed')
 
     parser.add_argument('--width',
                         action="store",
                         choices=['thick', 'reg', 'thin'],
-                        help='Choose how wide you want the graph blocks to be',
-                        default='reg')
+                        help='Choose how wide you want the graph blocks to be')
 
     parser.add_argument('--days',
                         action='store',
@@ -95,14 +93,11 @@ def _cmdline(argv=None):
                         dest='days',
                         nargs='+',
                         help="Choose what days to show. Please enter list of day "
-                             "abbreviations or full name of week",
-                        default=[],
-                        )
+                             "abbreviations or full name of week")
 
     parser.add_argument('--color',
                         choices=['grass', 'fire', 'sky'],
-                        help='Choose type of coloring you want for your graph',
-                        default='grass')
+                        help='Choose type of coloring you want for your graph')
 
     parser.add_argument('--stat-number',
                         dest='stat_number',
@@ -112,20 +107,17 @@ def _cmdline(argv=None):
     parser.add_argument('--stat', '-s',
                         dest='stat',
                         action='store_true',
-                        help='Show commits stat',
-                        default=False)
+                        help='Show commits stat')
 
     parser.add_argument('--separate', '-b',
                         dest='separate',
                         action='store_true',
-                        help='Separate each day',
-                        default=False)
+                        help='Separate each day')
 
     parser.add_argument('--month-merge',
                         dest='month_merge',
                         action='store_true',
-                        help='Separate each month',
-                        default=False)
+                        help='Separate each month')
 
     parser.add_argument('--author', '-a',
                         help='Filter heatmap by author. You can also write regex here')
