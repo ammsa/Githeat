@@ -372,11 +372,12 @@ def resize_until_fit(texts_list, width):
     return texts_list
 
 
-def open_commits_terminal(new_cursor_date_value, commits_on_date):
+def open_commits_terminal(new_cursor_date_value, commits_on_date, githeat):
     """
     Creates a new terminal window for showing commits info
     :param new_cursor_date_value:
     :param commits_on_date:
+    :param githeat: Githeat instance
     :return:
     """
     screen = {}
@@ -390,7 +391,6 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
         print_header_center(term, text, screen)
         text = u'ESC, to return'
         print_header_right(term, text, screen)
-
         #  hold the commit info that we will display depending on scrolling window edges
         commit_values_holder = []
         for commit in commits_on_date:
@@ -407,15 +407,15 @@ def open_commits_terminal(new_cursor_date_value, commits_on_date):
             )
 
             value = [
-                colorize(commit_hash, ansi=3),
+                colorize(commit_hash, ansi=githeat.colors[1]),
                 cdate,
                 spaces,
                 term.bold(subject),
-                colorize(author, ansi=6),
+                colorize(author, ansi=githeat.colors[2]),
             ]
 
             if email:
-                value.append(colorize("<{}>".format(email), ansi=14))
+                value.append(colorize("<{}>".format(email), ansi=githeat.colors[3]))
 
             value = " ".join(value)
             commit_values_holder.append(value)
@@ -685,7 +685,9 @@ def main(argv=None):
 
                 if commits_on_date:  # if block has contributions
                     #  open commits desc terminal
-                    open_commits_terminal(new_cursor_date_value, commits_on_date)
+                    open_commits_terminal(new_cursor_date_value,
+                                          commits_on_date,
+                                          githeat)
                     # redraw base terminal after exiting commits desc terminal
                     redraw(term=term, screen=screen)
                 else:
