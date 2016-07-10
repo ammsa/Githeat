@@ -10,7 +10,7 @@ from argparse import RawDescriptionHelpFormatter
 from blessed import Terminal
 from dateutil.parser import parse as parse_date
 import functools
-from git import Git
+from git import Git, GitCommandNotFound, GitCommandError, InvalidGitRepositoryError
 import re
 import os
 from xtermcolor import colorize
@@ -501,7 +501,11 @@ def main(argv=None):
     logger.debug("starting execution")
 
     #  get repo and initialize GitHeat instance
-    g = Git(os.getcwd())
+    try:
+        g = Git(os.getcwd())
+    except (InvalidGitRepositoryError, GitCommandError, GitCommandNotFound):
+        print("Are you sure you're in an initialized git directory?")
+        return 0
     githeat = Githeat(g, **vars(args))
     githeat.parse_commits()
     githeat.init_daily_contribution_map()

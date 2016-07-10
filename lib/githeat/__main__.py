@@ -157,11 +157,12 @@ def main(argv=None):
 
     try:
         g = Git(os.getcwd())
-        githeat = Githeat(g, **vars(args))
-        githeat.run()
-
     except (InvalidGitRepositoryError, GitCommandError, GitCommandNotFound):
-        print('Are you sure your in an initialized git directory?')
+        print("Are you sure you're in an initialized git directory?")
+        return 0
+
+    githeat = Githeat(g, **vars(args))
+    githeat.run()
 
     logger.info("successful completion")
     return 0
