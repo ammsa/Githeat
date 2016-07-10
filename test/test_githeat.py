@@ -57,7 +57,9 @@ def test_toggle_day_invalid_day_num(test_repo):
 
 def test_toggle_month(test_repo):
     test_repo.toggle_month(0)
-    assert test_repo.display_months == [datetime.date(2015, 6, 1)]
+    today = datetime.datetime.now()
+    last_year = datetime.date(today.year - 1, today.month, 1)
+    assert test_repo.display_months == [last_year]
     test_repo.toggle_month(0)
     assert test_repo.display_months == []
 
