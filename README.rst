@@ -174,6 +174,13 @@ Install using pip:
     $ pip install githeat
 
 
+Or to obtain the latest most-up-to-date version, clone the repo and install it from source:
+
+.. code-block::
+
+    $ git clone https://github.com/AmmsA/Githeat
+    $ cd Githeat && python setup.py install
+
 
 Install for the current user:
 
