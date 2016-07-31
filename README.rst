@@ -1,12 +1,8 @@
 |logo|
 ======
 
-Do you often find your self looking for a specific commit but you're unsure
-when it has been committed? Do you have any large git repositories that you
-want to find out who's contributing the most on a specifc day or month?
-Do you hesitate whether you should install an open-source project because
-you're not sure how active it is? GitHeat is developed to help you solve these
-problems. GitHeat will local machine to parse the git-log of your repo and
+Do you want to know how active is a git project throughout the year?
+GitHeat will use your own local machine to parse the git-log of your repo and
 allow you to navigate through an interactive heatmap in your own terminal,
 showing you what days are most popular, and what months are most active.
 
