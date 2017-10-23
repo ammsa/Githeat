@@ -1,10 +1,7 @@
 |logo|
 ======
 
-Do you want to know how active is a git project throughout the year?
-GitHeat will use your own local machine to parse the git-log of your repo and
-allow you to navigate through an interactive heatmap in your own terminal,
-showing you what days are most popular, and what months are most active.
+GitHeat uses your local machine to parse the git-log of your repo and build an interactive heatmap in your terminal. You can use GitHeat to see what days are most popular, and what months are most active.
 
 To start the interactive heatmap, run:
 
