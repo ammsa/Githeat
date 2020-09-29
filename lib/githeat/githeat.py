@@ -177,9 +177,9 @@ class Githeat:
 
         last_year_log_dates = self.git_repo.log(git_log_args)
         raw_commits = last_year_log_dates.replace("'", '').split("\n")
-        self.commits_db = {}  # holds commits by date as key
+        self.commits_db = defaultdict(list)  # holds commits by date as key
 
-        if raw_commits and raw_commits[0]:  # check if there exists any contribution
+        if raw_commits:  # check if there exists any contribution
             for rc in raw_commits:
                 [abbr_commit_hash, exact_date_and_time, author, author_email, subject]\
                     = helpers.remove_accents(rc).split(delimiter)
@@ -195,10 +195,7 @@ class Githeat:
                                 author,
                                 author_email,
                                 subject)
-                if exact_date_and_time.date() in self.commits_db:
-                    self.commits_db[exact_date_and_time.date()].append(commit)
-                else:
-                    self.commits_db[exact_date_and_time.date()] = [commit]
+                self.commits_db[exact_date_and_time.date()].append(commit)
         else:
             print('No contribution found')
             sys.exit(0)
@@ -347,6 +344,7 @@ class Githeat:
         else:
             new_column = self._Column(self.width)
             matrix.append(new_column)
+
         for current_day in sorted_normalized_daily_contribution:
             last_week_col = matrix[-1]
             day_contribution_color_index = int(self.daily_contribution_map[current_day])

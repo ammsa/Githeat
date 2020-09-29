@@ -167,8 +167,8 @@ def main(argv=None):
     logger.info("successful completion")
     return 0
 
-# Make it executable.
 
+# Make it executable.
 if __name__ == "__main__":
     try:
         status = main()
