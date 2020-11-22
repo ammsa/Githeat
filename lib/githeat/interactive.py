@@ -4,22 +4,34 @@
 """
 from __future__ import absolute_import
 from __future__ import print_function
+
 from argparse import ArgumentParser
 from argparse import ArgumentTypeError
 from argparse import RawDescriptionHelpFormatter
-from blessed import Terminal
-from dateutil.parser import parse as parse_date
 import functools
-from git import Git, GitCommandNotFound, GitCommandError, InvalidGitRepositoryError
-import re
 import os
+import re
+import sys
+
+from blessed import Terminal
+from git import Git
+from git import GitCommandError
+from git import GitCommandNotFound
+from git import InvalidGitRepositoryError
 from xtermcolor import colorize
+
+from dateutil.parser import parse as parse_date
+
 from . import __version__
 from .core import config
 from .core import logger
-from .util.interactive_navigation import Cursor
-from .util import interactive_navigation as nav
 from .githeat import Githeat
+from .util import interactive_navigation as nav
+from .util.interactive_navigation import Cursor
+
+if sys.version_info[0] >= 3:
+    unicode = str
+
 
 __all__ = "main",
 

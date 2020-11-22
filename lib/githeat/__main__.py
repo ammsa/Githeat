@@ -9,20 +9,20 @@ from __future__ import print_function
 from argparse import ArgumentParser
 from argparse import ArgumentTypeError
 from argparse import RawDescriptionHelpFormatter
-from dateutil.parser import parse as parse_date
+import os
+import re
+
 from git import Git
 from git.exc import GitCommandError
 from git.exc import GitCommandNotFound
 from git.exc import InvalidGitRepositoryError
-import re
-import os
+
+from dateutil.parser import parse as parse_date
 
 from . import __version__
 from .core import config
 from .core import logger
-
 from .githeat import Githeat
-
 
 DAY_REGEX = r"(?i)^(Sun|Mon|(T(ues|hurs))|Fri)(day|\.)" \
             r"?$|Wed(\.|nesday)?$|Sat(\.|urday)?$|T((ue?)|(hu?r?))\.?$"
@@ -153,7 +153,7 @@ def main(argv=None):
     """
     args = _cmdline(argv)
     logger.start(args.logging_level)
-    logger.info("executing githeat")
+    logger.debug("executing githeat")
 
     try:
         g = Git(os.getcwd())
@@ -164,7 +164,7 @@ def main(argv=None):
     githeat = Githeat(g, **vars(args))
     githeat.run()
 
-    logger.info("successful completion")
+    logger.debug("successful completion")
     return 0
 
 

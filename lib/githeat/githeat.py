@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
+from collections import Counter
+from collections import defaultdict
 import datetime
 import itertools
+from itertools import cycle
+import os
 import sys
-from collections import Counter, defaultdict
+
+from xtermcolor import colorize
 
 from dateutil.parser import parse as parse_date
 from dateutil.relativedelta import relativedelta
-from itertools import cycle
-import os
-from xtermcolor import colorize
 
 from .core import logger
 from .util import helpers
@@ -47,6 +49,7 @@ class Commit:
 
 
 class Githeat:
+
     class _Column:
 
         def __init__(self, width, full_empty_col=False):
@@ -157,7 +160,7 @@ class Githeat:
         """
         Updates colors to next color in `COLORS` list
         """
-        self.colors = self.colors_iterator.next()
+        self.colors = next(self.colors_iterator)
         return self.colors
 
     def parse_commits(self):

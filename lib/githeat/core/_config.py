@@ -8,6 +8,7 @@ from __future__ import absolute_import
 
 from re import compile
 from yaml import load
+from yaml import FullLoader
 
 from ._logger import logger
 
@@ -77,7 +78,7 @@ class _Config(_AttrDict):
                     # substitution as the file is parsed.
                     logger.info("reading config data from {:s}".format(path))
                     yaml = regex.sub(replace, stream.read())
-                    self.update(load(yaml))
+                    self.update(load(yaml, Loader=FullLoader))
             except TypeError:  # load() returned None
                 logger.warn("config file '{:s}' is empty".format(yaml))
             except IOError:

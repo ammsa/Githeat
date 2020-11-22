@@ -122,7 +122,8 @@ def remove_accents(input_str):
     """
     nfkd_form = unicodedata.normalize('NFKD', input_str)
     only_ascii = nfkd_form.encode('ASCII', 'ignore')
-    return only_ascii
+    return str(only_ascii)
+
 
 def first(iterable, func=lambda L: L is not None, **kwargs):
     """

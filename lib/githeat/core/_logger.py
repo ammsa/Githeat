@@ -6,12 +6,10 @@ until the logger is started.
 """
 from __future__ import absolute_import
 
-from logging import getLogger
 from logging import Formatter
 from logging import Logger
 from logging import NullHandler
 from logging import StreamHandler
-
 
 __all__ = "logger",
 
