@@ -176,7 +176,7 @@ class Githeat:
             time_spec = ["--since=1 year 7 days"]
         else:
             time_spec = [
-                "--since=%d-01-01" % self.year,
+                "--since=%d-12-25" % (self.year-1), # include a week before new year's
                 "--before=%d-01-01" % (self.year+1)
             ]
 
@@ -192,7 +192,7 @@ class Githeat:
         raw_commits = log_dates.replace("'", '').split("\n")
         self.commits_db = defaultdict(list)  # holds commits by date as key
 
-        if raw_commits:  # check if there exists any contribution
+        if raw_commits and (len(raw_commits) > 1 or raw_commits[0] != ''):  # check if there exists any contribution
             for rc in raw_commits:
                 [abbr_commit_hash, exact_date_and_time, author, author_email, subject]\
                     = helpers.remove_accents(rc).split(delimiter)
@@ -221,14 +221,18 @@ class Githeat:
 
         self.daily_contribution_map = defaultdict(float)
 
-        today = datetime.date.today()
-        last_year = today - relativedelta(years=1, days=7)
+        if self.year is None:
+            last_day = datetime.date.today()
+            first_day = last_day - relativedelta(years=1, days=7)
+        else:
+            last_day = datetime.date(self.year, 12, 31)
+            first_day = datetime.date(self.year, 1, 1) - relativedelta(days=6)
 
         #  iterate through from last year date + 7 days and init dict with zeros
-        delta = today - last_year
+        delta = last_day - first_day
         flag_skip_til_first_sunday = True
         for i in range(delta.days + 1):
-            current_day = last_year + datetime.timedelta(days=i)
+            current_day = first_day + datetime.timedelta(days=i)
             # we need to start from the first sunday, so skip anything before it
             if flag_skip_til_first_sunday:
                 if current_day.strftime("%A") != 'Sunday':
