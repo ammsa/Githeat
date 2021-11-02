@@ -95,6 +95,11 @@ def _cmdline(argv=None):
                         help="Choose what days to show. Please enter list of day "
                              "abbreviations or full name of week")
 
+    parser.add_argument('--year',
+                        type=int,
+                        dest='year',
+                        help="Specify year. Uses the last year and a week if not given")
+
     parser.add_argument('--color',
                         choices=['grass', 'fire', 'sky'],
                         help='Choose type of coloring you want for your graph')

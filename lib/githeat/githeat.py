@@ -90,7 +90,7 @@ class Githeat:
     def __init__(self, git_repo,
                  gtype='block', width='reg', days=[], color='grass', colors=[],
                  stat=False, stat_number=5, separate=True, month_merge=False,
-                 legend=False, author=None, grep=None, config=None,
+                 legend=False, author=None, grep=None, config=None, year=None,
                  logging_level="CRITICAL"
                  ):
         self.git_repo = git_repo
@@ -98,6 +98,7 @@ class Githeat:
         self.gtype = gtype
         self.width = BLOCK_REG
         self.days = days
+        self.year = year
         self.days_toggle = [False] * 7
         self.months = []
         self.display_months = []
@@ -170,16 +171,25 @@ class Githeat:
         """
         logger.debug("parsing git log")
         delimiter = '<githeat_delimeter>'
-        git_log_args = ["--since=1 year 7 days",
-                        "--pretty=format:'%h{0}%ci{0}%an{0}%ae{0}%s'".format(delimiter),
-                        "--date=local"]
+
+        if self.year is None:
+            time_spec = ["--since=1 year 7 days"]
+        else:
+            time_spec = [
+                "--since=%d-01-01" % self.year,
+                "--before=%d-01-01" % (self.year+1)
+            ]
+
+        git_log_args = time_spec + [
+            "--pretty=format:'%h{0}%ci{0}%an{0}%ae{0}%s'".format(delimiter),
+            "--date=local"
+        ]
         if self.author:
             git_log_args.append('--author={}'.format(self.author))
         if self.grep:
             git_log_args.append("--grep={}".format(self.grep))
-
-        last_year_log_dates = self.git_repo.log(git_log_args)
-        raw_commits = last_year_log_dates.replace("'", '').split("\n")
+        log_dates = self.git_repo.log(git_log_args)
+        raw_commits = log_dates.replace("'", '').split("\n")
         self.commits_db = defaultdict(list)  # holds commits by date as key
 
         if raw_commits:  # check if there exists any contribution
