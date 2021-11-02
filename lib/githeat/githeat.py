@@ -90,7 +90,7 @@ class Githeat:
     def __init__(self, git_repo,
                  gtype='block', width='reg', days=[], color='grass', colors=[],
                  stat=False, stat_number=5, separate=True, month_merge=False,
-                 legend=False, author=None, grep=None, config=None,
+                 legend=False, author=None, grep=None, config=None, year=None,
                  logging_level="CRITICAL"
                  ):
         self.git_repo = git_repo
@@ -98,6 +98,7 @@ class Githeat:
         self.gtype = gtype
         self.width = BLOCK_REG
         self.days = days
+        self.year = year
         self.days_toggle = [False] * 7
         self.months = []
         self.display_months = []
@@ -170,19 +171,28 @@ class Githeat:
         """
         logger.debug("parsing git log")
         delimiter = '<githeat_delimeter>'
-        git_log_args = ["--since=1 year 7 days",
-                        "--pretty=format:'%h{0}%ci{0}%an{0}%ae{0}%s'".format(delimiter),
-                        "--date=local"]
+
+        if self.year is None:
+            time_spec = ["--since=1 year 7 days"]
+        else:
+            time_spec = [
+                "--since=%d-12-25" % (self.year-1), # include a week before new year's
+                "--before=%d-01-01" % (self.year+1)
+            ]
+
+        git_log_args = time_spec + [
+            "--pretty=format:'%h{0}%ci{0}%an{0}%ae{0}%s'".format(delimiter),
+            "--date=local"
+        ]
         if self.author:
             git_log_args.append('--author={}'.format(self.author))
         if self.grep:
             git_log_args.append("--grep={}".format(self.grep))
-
-        last_year_log_dates = self.git_repo.log(git_log_args)
-        raw_commits = last_year_log_dates.replace("'", '').split("\n")
+        log_dates = self.git_repo.log(git_log_args)
+        raw_commits = log_dates.replace("'", '').split("\n")
         self.commits_db = defaultdict(list)  # holds commits by date as key
 
-        if raw_commits:  # check if there exists any contribution
+        if raw_commits and (len(raw_commits) > 1 or raw_commits[0] != ''):  # check if there exists any contribution
             for rc in raw_commits:
                 [abbr_commit_hash, exact_date_and_time, author, author_email, subject]\
                     = helpers.remove_accents(rc).split(delimiter)
@@ -211,14 +221,18 @@ class Githeat:
 
         self.daily_contribution_map = defaultdict(float)
 
-        today = datetime.date.today()
-        last_year = today - relativedelta(years=1, days=7)
+        if self.year is None:
+            last_day = datetime.date.today()
+            first_day = last_day - relativedelta(years=1, days=7)
+        else:
+            last_day = datetime.date(self.year, 12, 31)
+            first_day = datetime.date(self.year, 1, 1) - relativedelta(days=6)
 
         #  iterate through from last year date + 7 days and init dict with zeros
-        delta = today - last_year
+        delta = last_day - first_day
         flag_skip_til_first_sunday = True
         for i in range(delta.days + 1):
-            current_day = last_year + datetime.timedelta(days=i)
+            current_day = first_day + datetime.timedelta(days=i)
             # we need to start from the first sunday, so skip anything before it
             if flag_skip_til_first_sunday:
                 if current_day.strftime("%A") != 'Sunday':
