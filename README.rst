@@ -213,16 +213,16 @@ Deploy the application in a self-contained `Virtualenv`_ environment:
     $ cd /path/to/apps/ && githeat/bin/cli --help
 
 
-.. |logo| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/logo.png?token=AAtq743NFLfHArCfd_styq-ckCxrpPKeks5XhWFNwA%3D%3D
+.. |logo| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/logo.png
    :width: 100px
    :alt: githeat
    :target: https://github.com/ammsa/Githeat
 .. |video| image:: https://asciinema.org/a/812lm3uzd9yk8dbe0aehj5jvj.png
    :target: https://asciinema.org/a/812lm3uzd9yk8dbe0aehj5jvj
-.. |githeat_cli| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli.png?token=AAtq7w4e7O2ttQRmDsdX-7u1zRzv5q3Pks5XhWZIwA%3D%3D
-.. |githeat_cli_month_merge| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli_month_merge.png?token=AAtq7wqIcMdV5lIyG2t76lcGPO6g_T60ks5XhWcewA%3D%3D
-.. |githeat_cli_separate| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli_separate.png?token=AAtq7xdd7EWEmYnI-9Y5g3kJdj9kb26Qks5XhWjXwA%3D%3D
-.. |githeat_cli_width_thin| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli_width_thin.png?token=AAtq7ycoZEZT0g99UJMrWmhyYHUYW4dGks5XhWkRwA%3D%3D
-.. |githeat_cli_color_fire| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli_color_fire.png?token=AAtq7xPXiZYtF3U6dQcN4ikFHVIQCfHzks5XhWkcwA%3D%3D
-.. |githeat_cli_stat_stat_number_10| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli_stat_stat_number_10.png?token=AAtq72NP0xh5eel4N5WGO3JgdSQgUMX-ks5XhWkkwA%3D%3D
+.. |githeat_cli| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli.png
+.. |githeat_cli_month_merge| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli_month_merge.png
+.. |githeat_cli_separate| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli_separate.png
+.. |githeat_cli_width_thin| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli_width_thin.png
+.. |githeat_cli_color_fire| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli_color_fire.png
+.. |githeat_cli_stat_stat_number_10| image:: https://raw.githubusercontent.com/AmmsA/Githeat/master/website/static/images/githeat_cli_stat_stat_number_10.png
 
